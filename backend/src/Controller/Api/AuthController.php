@@ -2,46 +2,79 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\User;
+// Les "use" importent des classes venant d'ailleurs.
+// Sans eux, il faudrait écrire le nom complet à chaque fois :
+// \Symfony\Component\HttpFoundation\Request au lieu de Request.
 use App\Entity\ResetMdp;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Attribute\Route;   // Attribute, PAS Annotation (Symfony 8)
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+// AbstractController fournit des raccourcis comme $this->json().
+// Sans l'étendre, il faudrait construire les réponses HTTP à la main.
 class AuthController extends AbstractController
 {
+    // ═══════════════════════════════════════════════════════════════
+    //  INSCRIPTION
+    // ═══════════════════════════════════════════════════════════════
+
+    // L'attribut #[Route] déclare l'URL, le nom interne, et les méthodes HTTP acceptées.
+    // Symfony scanne le dossier src/Controller/ au démarrage pour trouver ces attributs.
+    // methods: ['POST'] signifie qu'un GET sur cette URL renverra 405 Method Not Allowed.
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+
+    // Les paramètres typés sont fournis automatiquement par Symfony : c'est l'injection
+    // de dépendances. Tu déclares ce dont tu as besoin, le conteneur te le donne.
+    // En PHP classique tu ferais "new PDO(...)" ; ici tu ne construis rien toi-même,
+    // ce qui rend le code testable et évite les variables globales.
     public function register(
-        Request $request,
-        ValidatorInterface $validator,
-        UserPasswordHasherInterface $hasher,
-        EntityManagerInterface $em,
+        Request $request,                    // la requête HTTP reçue
+        ValidatorInterface $validator,       // vérifie les contraintes #[Assert\...] de l'entité
+        UserPasswordHasherInterface $hasher, // transforme un mot de passe en empreinte
+        EntityManagerInterface $em,          // parle à la base via Doctrine
     ): JsonResponse {
-        // 1. Lire le corps JSON.
+
+        // ─── 1. Lire le corps JSON ───
+        // getContent() renvoie le texte brut envoyé par le client.
+        // json_decode(..., true) le transforme en tableau associatif PHP.
         $data = json_decode($request->getContent(), true);
 
+        // json_decode renvoie null si le texte n'était pas du JSON valide.
+        // Sans ce test, les lignes suivantes planteraient avec un message obscur.
         if (!is_array($data)) {
             return $this->json(['error' => 'Corps de requête JSON invalide.'], 400);
         }
 
-        // 2. Remplir l'objet. On ne lit QUE les champs autorisés :
-        //    un champ "role" envoyé par le client est simplement ignoré.
+        // ─── 2. Construire l'objet User ───
+        // On lit UNIQUEMENT les champs autorisés. Un champ "role" envoyé par le client
+        // est simplement ignoré : sinon n'importe qui deviendrait administrateur en
+        // ajoutant "role":"admin" à sa requête, puisque cette route est publique.
+        // La valeur par défaut 'user' de l'entité s'applique automatiquement.
         $user = new User();
         $user->setEmail($data['email'] ?? '');
         $user->setNom($data['nom'] ?? '');
         $user->setPrenom($data['prenom'] ?? '');
         $user->setPlainPassword($data['password'] ?? null);
 
-        // 3. Valider. Remplace à la fois tes empty() et ta requête d'unicité :
-        //    UniqueEntity fait le SELECT pour toi.
+        // ─── 3. Valider ───
+        // validate() déclenche toutes les contraintes déclarées en attributs sur User :
+        // NotBlank, Email, Length, et UniqueEntity qui fait un SELECT pour vérifier
+        // que l'email n'est pas déjà pris. Une seule ligne remplace tous les if
+        // de vérification ET la requête d'unicité.
         $erreurs = $validator->validate($user);
 
         if (count($erreurs) > 0) {
             $details = [];
+
+            // Chaque violation expose le champ fautif et le message associé.
+            // Les crochets [] accumulent : un champ peut avoir plusieurs erreurs.
+            // Résultat : {"email": ["Format invalide."], "nom": ["Obligatoire."]}
+            // Le front peut alors afficher chaque message sous le bon input.
             foreach ($erreurs as $erreur) {
                 $details[$erreur->getPropertyPath()][] = $erreur->getMessage();
             }
@@ -49,16 +82,30 @@ class AuthController extends AbstractController
             return $this->json(['errors' => $details], 400);
         }
 
-        // 4. Hasher. L'objet est passé en argument parce que la configuration
-        //    password_hashers est branchée sur son interface.
+        // ─── 4. Hasher le mot de passe ───
+        // $user est passé en premier argument parce que la configuration
+        // password_hashers de security.yaml est branchée sur son INTERFACE.
+        // C'est donc le type de l'objet qui détermine l'algorithme utilisé.
+        // Ne jamais appeler password_hash() directement : le service gère aussi
+        // la migration automatique si tu changes d'algorithme plus tard.
         $user->setPassword($hasher->hashPassword($user, $user->getPlainPassword()));
+
+        // Vide $plainPassword. Le mot de passe en clair ne doit pas rester
+        // en mémoire plus longtemps que nécessaire.
         $user->eraseCredentials();
 
-        // 5. persist() met l'objet en file d'attente, flush() exécute l'INSERT.
+        // ─── 5. Enregistrer ───
+        // persist() dit à Doctrine "cet objet est nouveau, prévois un INSERT".
+        // flush() exécute réellement la requête SQL.
+        // Les deux sont nécessaires pour un objet neuf.
         $em->persist($user);
         $em->flush();
 
-        // 6. L'id est renseigné par Doctrine après le flush.
+        // ─── 6. Répondre ───
+        // getId() ne renvoie une valeur qu'APRÈS le flush : l'id vient de
+        // l'auto-increment de MySQL, il n'existe pas avant l'INSERT.
+        // On ne renvoie jamais le hash ni le mot de passe.
+        // 201 = Created, le code HTTP correct pour une création réussie.
         return $this->json([
             'id' => $user->getId(),
             'email' => $user->getEmail(),
@@ -66,11 +113,17 @@ class AuthController extends AbstractController
             'prenom' => $user->getPrenom(),
         ], 201);
     }
-        #[Route('/api/forgot-password', name: 'api_forgot_password', methods: ['POST'])]
+
+    // ═══════════════════════════════════════════════════════════════
+    //  DEMANDE DE RÉINITIALISATION
+    // ═══════════════════════════════════════════════════════════════
+
+    #[Route('/api/forgot-password', name: 'api_forgot_password', methods: ['POST'])]
     public function forgotPassword(
         Request $request,
         EntityManagerInterface $em,
     ): JsonResponse {
+
         $data = json_decode($request->getContent(), true);
 
         if (!is_array($data)) {
@@ -78,16 +131,39 @@ class AuthController extends AbstractController
         }
 
         $email = $data['email'] ?? null;
+
+        // $token est initialisé AVANT le if. Sans ça, la variable pourrait ne
+        // jamais exister au moment du return, ce qui provoquerait une notice PHP.
         $token = null;
 
         if ($email) {
             $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
 
+            // findOneBy renvoie null si aucune ligne ne correspond.
+            // Ce test est indispensable : setUtilisateur() est typé User et
+            // lèverait une TypeError fatale si on lui passait null — ce qui
+            // produirait un 500 pour un email inconnu et un 200 pour un email
+            // connu, révélant exactement ce qu'on cherche à cacher.
             if ($user) {
+
+                // random_bytes s'adosse au générateur cryptographique du système.
+                // JAMAIS uniqid() ou rand() ici : ils dérivent de l'horloge et
+                // sont donc prédictibles par un attaquant.
+                // bin2hex convertit les 32 octets en 64 caractères hexadécimaux.
                 $token = bin2hex(random_bytes(32));
 
                 $reset = new ResetMdp();
+
+                // On stocke l'EMPREINTE du jeton, pas le jeton lui-même.
+                // Si la base fuite, l'attaquant n'a que des hashs, inutilisables.
+                // Même raisonnement que pour les mots de passe.
+                // sha256 et pas bcrypt : un jeton de 256 bits aléatoires n'est pas
+                // devinable par force brute, le hachage lent n'apporterait rien.
                 $reset->setToken(hash('sha256', $token));
+
+                // DateTimeImmutable plutôt que DateTime : une date d'expiration ne
+                // doit jamais être modifiée après création. L'objet immuable garantit
+                // qu'aucun appel à modify() ailleurs ne pourra la décaler.
                 $reset->setExpiration(new \DateTimeImmutable('+1 hour'));
                 $reset->setCreationMdp(new \DateTimeImmutable());
                 $reset->setUtilisateur($user);
@@ -97,137 +173,83 @@ class AuthController extends AbstractController
             }
         }
 
+        // Ce return est VOLONTAIREMENT hors des deux if.
+        // La réponse est strictement identique que l'email existe ou non :
+        // même message, même code HTTP 200. Sinon la route deviendrait un outil
+        // d'énumération — un attaquant testerait une liste d'adresses et saurait
+        // lesquelles sont inscrites sur le site.
         return $this->json([
             'message' => 'Si un compte existe avec cette adresse, un lien de réinitialisation a été envoyé.',
-            // TEMPORAIRE — à retirer quand Mailer sera configuré
+            // TEMPORAIRE — à retirer quand Mailer sera configuré.
+            // En production ce jeton part par email, jamais dans la réponse HTTP.
             'token' => $token,
         ]);
     }
-       #[Route('/api/reset-password', name: 'api_reset_password', methods: ['POST'])]
+
+    // ═══════════════════════════════════════════════════════════════
+    //  APPLICATION DU NOUVEAU MOT DE PASSE
+    // ═══════════════════════════════════════════════════════════════
+
+    #[Route('/api/reset-password', name: 'api_reset_password', methods: ['POST'])]
     public function resetPassword(
         Request $request,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher,
         ValidatorInterface $validator,
     ): JsonResponse {
-       
-   
-        // ÉTAPE 2 — Lire et vérifier les données envoyées par le client.
 
-        // $request représente la requête HTTP reçue.
-        // getContent() renvoie le corps brut de cette requête, sous forme de texte :
-        //   '{"token":"abc123","password":"MotDePasse123"}'
-        //
-        // json_decode() transforme ce texte en structure PHP.
-        // Le deuxième argument "true" demande un tableau associatif plutôt qu'un objet,
-        // ce qui permet d'écrire $data['token'] au lieu de $data->token.
         $data = json_decode($request->getContent(), true);
 
-        // Si le texte reçu n'était pas du JSON valide, json_decode() renvoie null.
-        // is_array() vérifie qu'on a bien obtenu un tableau.
-        // Le "!" signifie "non", donc cette condition se lit :
-        //   "si $data n'est PAS un tableau, alors..."
-        //
-        // Sans ce test, la ligne suivante planterait sur une valeur null,
-        // avec un message d'erreur incompréhensible pour le client.
         if (!is_array($data)) {
-            // $this->json() construit une réponse HTTP au format JSON.
-            // Le 400 est le code HTTP "Bad Request" : la requête du client est mal formée.
             return $this->json(['error' => 'Corps de requête JSON invalide.'], 400);
         }
 
-        // On extrait les deux valeurs dont on a besoin.
-        //
-        // L'opérateur ?? se lit "sinon" : si la clé 'token' existe dans $data,
-        // on prend sa valeur ; si elle n'existe pas, on met null.
-        // Sans ce ??, PHP émettrait un avertissement "clé indéfinie".
         $tokenRecu = $data['token'] ?? null;
         $nouveauMdp = $data['password'] ?? null;
 
-        // On vérifie que les deux valeurs sont bien présentes.
-        // Le || signifie "ou" : la condition est vraie si l'une OU l'autre manque.
-        //
-        // Attention : en PHP, !$variable est vrai pour null, pour une chaîne vide,
-        // et aussi pour la chaîne "0". Ici ça convient, un token ou un mot de passe
-        // ne valent jamais "0".
+        // Le || signifie "ou" : la condition est vraie si l'un OU l'autre manque.
         if (!$tokenRecu || !$nouveauMdp) {
             return $this->json(['error' => 'Token et mot de passe requis.'], 400);
         }
 
-        // TEMPORAIRE — sert uniquement à vérifier que la lecture fonctionne.
-        // Sera remplacé par la suite du traitement à l'étape 3.
-                // ÉTAPE 3 — Retrouver la demande de réinitialisation correspondante.
-
-        // Rappel : lors de forgot-password, on a envoyé le token EN CLAIR au client,
-        // mais on a stocké son empreinte SHA-256 en base.
-        // Pour retrouver la ligne, il faut donc recalculer cette empreinte.
+        // ─── Retrouver la demande ───
+        // Le client envoie le jeton en clair, la base contient son empreinte.
+        // On recalcule donc l'empreinte pour chercher la ligne.
         //
-        // hash('sha256', 'abc') donne toujours le même résultat :
-        // c'est une fonction déterministe, contrairement au hachage de mot de passe
-        // qui ajoute un sel aléatoire à chaque appel.
+        // sha256 est DÉTERMINISTE : la même entrée donne toujours la même sortie.
         // C'est ce qui permet de s'en servir comme clé de recherche.
+        // Un hachage de mot de passe, lui, ajoute un sel aléatoire à chaque appel,
+        // et ne pourrait donc pas servir ainsi.
         $tokenHache = hash('sha256', $tokenRecu);
 
-        // getRepository() donne accès aux méthodes de recherche pour une entité.
-        // findOneBy() cherche UNE ligne correspondant aux critères passés en tableau.
-        // Si rien ne correspond, il renvoie null (et non une erreur).
         $reset = $em->getRepository(ResetMdp::class)->findOneBy([
             'token' => $tokenHache,
         ]);
 
-        // ÉTAPE 4 — Vérifier que la demande existe et n'a pas expiré.
-
-        // Deux cas d'échec possibles :
-        //   1. $reset vaut null : aucun jeton ne correspond (inventé, ou déjà utilisé).
-        //   2. La date d'expiration est passée : le lien est trop vieux.
+        // ─── Vérifier la validité ───
+        // Deux échecs possibles : le jeton n'existe pas (inventé, ou déjà utilisé),
+        // ou il a expiré. PHP compare directement deux objets de date.
         //
-        // Le || signifie "ou" : il suffit qu'une des deux conditions soit vraie.
-        //
-        // PHP sait comparer deux objets de date avec < et > : il compare les instants.
-        // getExpiration() renvoie la date enregistrée lors de forgot-password,
-        // new \DateTimeImmutable() sans argument donne l'instant présent.
-        // Donc "expiration < maintenant" se lit : "la date limite est déjà dépassée".
+        // UN SEUL message pour les deux cas : distinguer "jeton inconnu" de
+        // "jeton expiré" renseignerait un attaquant sur ses tentatives.
         if (!$reset || $reset->getExpiration() < new \DateTimeImmutable()) {
-
-            // Un SEUL message pour les deux cas, volontairement.
-            // Distinguer "jeton inconnu" de "jeton expiré" renseignerait un attaquant
-            // sur la validité des jetons qu'il teste. On reste vague.
             return $this->json(['error' => 'Lien invalide ou expiré.'], 400);
         }
 
-        // Si on arrive ici, c'est que $reset existe ET qu'il est encore valide.
-        // PHP n'exécute la suite que si la condition ci-dessus était fausse.
-
-        // getUtilisateur() suit la relation ManyToOne déclarée dans l'entité ResetMdp.
-        // Doctrine va chercher la ligne correspondante dans UTILISATEUR
-        // et te rend un objet User complet.
+        // Si on arrive ici, $reset existe et est valide.
+        // getUtilisateur() suit la relation ManyToOne : Doctrine va chercher
+        // la ligne correspondante dans UTILISATEUR et renvoie un objet User.
         $user = $reset->getUtilisateur();
 
-        // ÉTAPE 5 — Valider le nouveau mot de passe.
-
-        // On pose le mot de passe en clair sur l'objet User.
-        // Rappel : cette propriété n'est pas enregistrée en base (pas de #[ORM\Column]).
-        // Elle existe uniquement pour porter la valeur le temps de la validation.
+        // ─── Valider le nouveau mot de passe ───
+        // On repasse par le Validator plutôt que de réécrire la règle des
+        // 8 caractères : elle vit dans l'entité et s'applique partout.
+        // Si tu la changes un jour, inscription et réinitialisation suivent.
         $user->setPlainPassword($nouveauMdp);
-
-        // validate() déclenche toutes les contraintes #[Assert\...] de l'entité
-        // et renvoie la liste des violations trouvées.
-        //
-        // Intérêt : la règle "au moins 8 caractères" est écrite une seule fois,
-        // dans l'entité, et s'applique ici comme à l'inscription.
-        // Si tu changes la règle plus tard, les deux routes suivent automatiquement.
         $erreurs = $validator->validate($user);
 
-        // count() compte les violations. Zéro signifie que tout est valide.
         if (count($erreurs) > 0) {
             $details = [];
-
-            // foreach parcourt chaque violation trouvée.
-            // getPropertyPath() donne le nom du champ fautif ('plainPassword' ici).
-            // getMessage() donne le message défini dans l'attribut Assert.
-            //
-            // Les crochets [] à la fin ajoutent au tableau : si un même champ
-            // a plusieurs erreurs, elles s'accumulent au lieu de s'écraser.
             foreach ($erreurs as $erreur) {
                 $details[$erreur->getPropertyPath()][] = $erreur->getMessage();
             }
@@ -235,40 +257,25 @@ class AuthController extends AbstractController
             return $this->json(['errors' => $details], 400);
         }
 
-        // TEMPORAIRE — confirme que la validation est passée.
-        // ÉTAPE 6 — Enregistrer le nouveau mot de passe et invalider le jeton.
-
-        // hashPassword() transforme le mot de passe en clair en empreinte sécurisée.
-        // L'objet $user est passé en premier argument parce que la configuration
-        // password_hashers de security.yaml est branchée sur son interface :
-        // c'est le type de l'objet qui détermine l'algorithme appliqué.
-        //
-        // Le résultat est posé sur la propriété $password, celle qui va en base.
+        // ─── Appliquer ───
         $user->setPassword($hasher->hashPassword($user, $nouveauMdp));
-
-        // eraseCredentials() vide la propriété $plainPassword.
-        // Le mot de passe en clair ne doit pas traîner en mémoire plus longtemps
-        // que nécessaire, et surtout pas être sérialisé quelque part par accident.
         $user->eraseCredentials();
 
-        // remove() marque la ligne pour suppression.
-        // C'est ce qui rend le lien à usage unique : une fois le mot de passe changé,
-        // le même lien ne fonctionnera plus, même s'il n'a pas encore expiré.
-        //
-        // Sans cette ligne, quelqu'un qui retrouverait l'email dans une boîte mail
-        // pourrait rechanger le mot de passe pendant l'heure de validité.
+        // remove() marque la ligne pour suppression : c'est ce qui rend le lien
+        // à USAGE UNIQUE. Sans cette ligne, quelqu'un qui retrouverait l'email
+        // pourrait rechanger le mot de passe pendant toute l'heure de validité.
         $em->remove($reset);
 
-        // flush() exécute tout d'un coup : l'UPDATE sur UTILISATEUR
-        // et le DELETE sur RESET_MDP, dans une seule transaction.
+        // Un seul flush pour les deux opérations : l'UPDATE sur UTILISATEUR et
+        // le DELETE sur RESET_MDP partent dans la même transaction.
         //
-        // Pas besoin de persist() pour $user : Doctrine le suit déjà,
-        // puisqu'il vient d'être chargé depuis la base. Il détecte les
-        // modifications automatiquement au moment du flush.
+        // Pas de persist() pour $user : Doctrine le suit déjà puisqu'il vient
+        // d'être chargé depuis la base. Il compare son état avant/après et
+        // génère l'UPDATE tout seul. persist() ne sert que pour un objet NEUF.
         $em->flush();
 
         return $this->json([
             'message' => 'Mot de passe modifié avec succès.',
         ]);
-         }
+    }
 }
