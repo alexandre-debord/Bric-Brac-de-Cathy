@@ -1,39 +1,64 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Le hasher est branché sur l'INTERFACE, pas sur ta classe.
+    # 'auto' laisse Symfony choisir le meilleur algorithme disponible sur ton PHP
+    # (Argon2id si sodium est actif, bcrypt sinon) et migrer automatiquement
+    # les anciens hashs le jour où l'algorithme par défaut change.
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    # Le provider dit à Symfony COMMENT retrouver un utilisateur à partir
+    # de son identifiant. 'property' doit désigner la même propriété que
+    # celle renvoyée par getUserIdentifier() dans ton entité.
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
 
     firewalls:
+        # Désactive toute sécurité sur les outils de dev (profiler, assets).
+        # Sans ça, la barre de debug déclenche des authentifications parasites.
         dev:
-            # Ensure dev tools and static assets are always allowed
-            pattern: ^/(_profiler|_wdt|assets|build)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
-            provider: users_in_memory
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
+        # FIREWALL 1 — délivrance du token.
+        # Il ne couvre QUE la route de login. C'est le point critique :
+        # les firewalls sont évalués dans l'ordre du fichier, et le PREMIER
+        # dont le pattern correspond traite la requête, à l'exclusion des autres.
+        # Placé après 'api', il ne serait jamais atteint.
+        login:
+            pattern: ^/api/login_check$
+            stateless: true
+            provider: app_user_provider
+            json_login:
+                check_path: /api/login_check
+                # Par défaut json_login attend les clés "username" et "password"
+                # dans le corps JSON. On redirige la première vers "email".
+                username_path: email
+                password_path: password
+                # Ces deux handlers viennent de Lexik : le premier fabrique
+                # et renvoie le JWT après une authentification réussie,
+                # le second formate l'échec en JSON plutôt qu'en page HTML.
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+        # FIREWALL 2 — consommation du token.
+        # Couvre tout le reste de l'API. Authentifie en lisant l'en-tête
+        # Authorization: Bearer <token>, sans jamais toucher au mot de passe.
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            jwt: ~
 
-    # Note: Only the *first* matching rule is applied
+    # Évalué APRÈS le firewall, sur la première règle qui matche.
+    # L'ordre est donc décroissant en spécificité : les exceptions publiques
+    # d'abord, la règle générale en dernier.
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
-
-when@test:
-    security:
-        password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+        - { path: ^/api/login_check,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/register,       roles: PUBLIC_ACCESS }
+        - { path: ^/api/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/api/reset-password,  roles: PUBLIC_ACCESS }
+        - { path: ^/api/ping,           roles: PUBLIC_ACCESS }
+        - { path: ^/api,                roles: IS_AUTHENTICATED_FULLY }
