@@ -1,0 +1,131 @@
+/* Barre de navigation principale */
+.topbar-custom {
+  background-color: #6b1124; /* Rouge bordeaux foncé */
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color: #ffffff;
+}
+
+/* Bouton / Lien MENU à gauche */
+.topbar-menu-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.topbar-menu-btn:hover {
+  color: #e0d0d0;
+}
+
+/* Titre centré */
+.topbar-brand {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #ffffff;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.topbar-brand:hover {
+  color: #ffffff;
+}
+
+/* Section de droite (Navigation + Panier) */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+}
+
+.topbar-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease;
+}
+
+.topbar-link:hover {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+/* Bouton du panier */
+.topbar-cart-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.topbar-cart-link:hover {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+/* Style du panneau Offcanvas (Menu Burger) */
+.offcanvas-custom {
+  background-color: #1a1a1a !important; /* Fond noir / anthracite */
+  color: #ffffff !important;
+  width: 320px !important;
+}
+
+/* Bouton de fermeture (Croix) */
+.offcanvas-custom .btn-close {
+  filter: invert(1); /* Passe la croix en blanc */
+}
+
+/* Contenu du menu */
+.offcanvas-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 40px 0 0 0;
+}
+
+.offcanvas-menu-item {
+  margin-bottom: 24px;
+}
+
+.offcanvas-menu-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.offcanvas-menu-link:hover {
+  color: #ffffff;
+  opacity: 0.7;
+}
+
+/* Infos complémentaires en bas de menu */
+.offcanvas-footer-info {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.85rem;
+  color: #888888;
+  border-top: 1px solid #333333;
+  padding-top: 20px;
+  margin-top: auto;
+}

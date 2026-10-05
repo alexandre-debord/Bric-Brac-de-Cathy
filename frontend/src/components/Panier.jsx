@@ -1,0 +1,114 @@
+import { Container, Button, Table } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { usePanier } from '../hooks/usePanier';
+import { formaterPrix } from '../utils/formaterPrix';
+
+const Panier = () => {
+  // Données et actions du panier
+  const { isEmpty, removeItem, changerQuantite, items, emptyCart, cartTotal } = usePanier();
+
+  // Si le panier est vide : message + bouton vers la boutique
+  if (isEmpty) {
+    return (
+      <Container className="py-5 text-center">
+        <h1 className="mb-4">Votre panier</h1>
+        <p className="text-muted">Votre panier est vide.</p>
+        <Button as={Link} to="/produits" variant="danger">
+          Découvrir la boutique
+        </Button>
+      </Container>
+    );
+  }
+
+  // Si le panier contient des articles : affichage du tableau
+  return (
+    <Container className="py-5">
+      <h1 className="mb-4">Votre panier</h1>
+
+      <Table responsive className="align-middle">
+        <thead>
+          <tr>
+            <th>Article</th>
+            <th>Prix</th>
+            <th>Quantité</th>
+            <th>Sous-total</th>
+            <th><span className="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Une ligne <tr> par article */}
+          {items.map((item) => (
+            <tr key={item.id}>
+              <td>
+                <div className="d-flex align-items-center">
+                  {/*L'image, seulement s'il y en a une */}
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      alt={item.nom}
+                      width={60}
+                      className="me-3 rounded"
+                    />
+                  )}
+                  <div>
+                    <strong>{item.nom}</strong>
+                    {/* La couleur en petit, seulement s'il y en a une */}
+                    {item.couleur && (
+                      <div className="text-muted small">{item.couleur}</div>
+                    )}
+                  </div>
+                </div>
+              </td>
+              <td>{formaterPrix(item.price)}</td>
+              <td>
+                <div className="d-flex align-items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() => changerQuantite(item.id, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    aria-label="Diminuer la quantité"
+                  >
+                    −
+                  </Button>
+                  <span>{item.quantity}</span>
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() => changerQuantite(item.id, item.quantity + 1)}
+                    disabled={item.quantity >= item.stock}
+                    aria-label="Augmenter la quantité"
+                  >
+                    +
+                  </Button>
+                </div>
+              </td>
+              <td>{formaterPrix(item.itemTotal)}</td>
+              <td>
+                <Button variant="link" className="text-danger" onClick={() => removeItem(item.id)}>
+                  Supprimer
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
+        <Button variant="outline-danger" onClick={emptyCart}>
+          Vider le panier
+        </Button>
+        <div className="text-end">
+          <p className="fs-4 mb-2">
+            Total : <strong>{formaterPrix(cartTotal)}</strong>
+          </p>
+          <Button variant="danger" disabled>
+            Commander
+          </Button>
+          <div className="small text-muted mt-1">Paiement bientôt disponible</div>
+        </div>
+      </div>
+    </Container>
+  );
+};
+
+export default Panier;

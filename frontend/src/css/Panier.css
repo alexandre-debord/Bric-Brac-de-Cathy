@@ -1,0 +1,150 @@
+/* Page Panier */
+.panier-page {
+  background-color: #fcfbfa;
+  min-height: 80vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* En-tête */
+.panier-subtitle-accent {
+  color: #c85a54;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.panier-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 2.2rem;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Ligne produit */
+.panier-item-row {
+  border-bottom: 1px solid #eee8e0;
+}
+
+.panier-item-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.panier-item-title {
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  margin: 0;
+  color: #222222;
+}
+
+.panier-item-desc {
+  font-size: 0.75rem;
+  color: #888888;
+  margin: 2px 0 6px 0;
+}
+
+.panier-item-price-unit {
+  color: #c85a54;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Quantité Picker */
+.panier-quantity-picker {
+  border: 1px solid #e2ddd5;
+  background-color: #ffffff;
+}
+
+.panier-quantity-picker button {
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  color: #666666;
+  cursor: pointer;
+}
+
+.panier-quantity-picker button:hover {
+  color: #000000;
+}
+
+.panier-quantity-picker span {
+  padding: 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Total ligne & bouton supprimer */
+.panier-item-total {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222222;
+}
+
+.panier-btn-supprimer {
+  background: none;
+  border: none;
+  color: #999999;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  padding: 0;
+  margin-top: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.panier-btn-supprimer:hover {
+  color: #c85a54;
+  text-decoration: underline;
+}
+
+/* Carte Récapitulatif */
+.panier-summary-card {
+  background-color: #f4eee6;
+  border-radius: 2px;
+}
+
+.summary-title {
+  font-family: Georgia, serif;
+  font-size: 1.3rem;
+  color: #222222;
+}
+
+.summary-divider {
+  border-color: #dcd4c8;
+  opacity: 0.8;
+}
+
+.summary-total-price {
+  color: #c85a54;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.btn-checkout {
+  background-color: #6b1124 !important;
+  border: none !important;
+  border-radius: 2px !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 1.5px !important;
+  font-weight: 600 !important;
+}
+
+.btn-checkout:hover {
+  background-color: #520d1c !important;
+}
+
+.continue-shopping-link {
+  color: #c85a54;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.continue-shopping-link:hover {
+  text-decoration: underline;
+}

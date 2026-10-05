@@ -1,0 +1,129 @@
+/* ==========================================================================
+   GRILLE ET CONTENEUR
+   ========================================================================== */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+  padding: 20px 0;
+}
+
+/* ==========================================================================
+   CARTE PRODUIT
+   ========================================================================== */
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  aspect-ratio: 1 / 1; /* Carte parfaitement carrée */
+  cursor: pointer;
+  background-color: #2a2a2a;
+}
+
+/* Image de fond */
+.product-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+/* Léger zoom au survol de la carte */
+.product-card:hover .product-card-img {
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   BADGE PRIX (Haut à droite)
+   ========================================================================== */
+
+.product-card-price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: #ffffff;
+  color: #c85a54;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+/* ==========================================================================
+   OVERLAY TEXTE (Bas à gauche)
+   ========================================================================== */
+
+.product-card-overlay {
+  position: absolute;
+  inset: 0;
+  /* Dégradé noir pour garantir la lisibilité du texte blanc */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.2) 40%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.product-card-title {
+  color: #ffffff;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.25rem;
+  font-weight: normal;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.product-card-subtitle {
+  color: #d1d1d1;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.8rem;
+  margin: 4px 0 0 0;
+}
+
+/* ==========================================================================
+   BOUTON + ROND ROUGE (Apparition au survol)
+   ========================================================================== */
+
+.product-card-add-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #6b1124; /* Rouge bordeaux */
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
+  z-index: 3;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* État au survol de la carte */
+.product-card:hover .product-card-add-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Survol direct du bouton */
+.product-card-add-btn:hover {
+  background-color: #8c1630;
+}
