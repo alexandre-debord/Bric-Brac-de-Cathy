@@ -7,9 +7,22 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Metadata\ApiResource; // la classe qui déclare une ressource API Platform
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Get(),
+    ]
+)]
 #[ORM\Entity]
 #[ORM\Table(name: "PRODUIT")]
+#[ApiFilter(SearchFilter::class, properties: ['nomDuProduit' => 'partial', 'categorie' => 'exact'])]
 class Produit
 {
     #[ORM\Id]
@@ -23,12 +36,14 @@ class Produit
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(name: "creation_produit", type: "datetime", nullable: true)]
+    #[ORM\Column(name: "creation_produit", type: "datetime_immutable", nullable: true)]
     private ?\DateTimeInterface $creationProduit = null;
 
     #[ORM\ManyToOne(targetEntity: Categorie::class)]
     #[ORM\JoinColumn(name: "id_categorie", referencedColumnName: "id_categorie", nullable: false)]
     private Categorie $categorie;
+
+    #[ApiProperty(readableLink: true)]
 
     #[ORM\OneToMany(mappedBy: "produit", targetEntity: Declinaison::class, cascade: ["remove"], orphanRemoval: true)]
     private Collection $declinaisons;
@@ -72,12 +87,12 @@ class Produit
         return $this;
     }
 
-    public function getCreationProduit(): ?\DateTime
+    public function getCreationProduit(): ?\DateTimeInterface
     {
         return $this->creationProduit;
     }
 
-    public function setCreationProduit(?\DateTime $creationProduit): static
+    public function setCreationProduit(?\DateTimeInterface $creationProduit): static
     {
         $this->creationProduit = $creationProduit;
 

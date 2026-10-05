@@ -13,11 +13,11 @@ class Panier
     #[ORM\Column(name: "id_panier", type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(name: "creation_panier", type: "datetime", nullable: true)]
-    private ?\DateTimeInterface $creationPanier = null;
+    #[ORM\Column(name: "creation_panier", type: "datetime_immutable", nullable: true)]
+    private ?\DateTimeImmutable $creationPanier = null;
 
-    #[ORM\Column(name: "modification_panier", type: "datetime", nullable: true)]
-    private ?\DateTimeInterface $modificationPanier = null;
+    #[ORM\Column(name: "modification_panier", type: "datetime_immutable", nullable: true)]
+    private ?\DateTimeImmutable $modificationPanier = null;
 
     #[ORM\OneToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id_utilisateur", nullable: false, unique: true, onDelete: "CASCADE")]
@@ -25,29 +25,34 @@ class Panier
 
     // getters/setters
 
+    public function __construct()
+    {
+        $this->creationPanier = new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCreationPanier(): ?\DateTime
+    public function getCreationPanier(): ?\DateTimeImmutable
     {
         return $this->creationPanier;
     }
 
-    public function setCreationPanier(?\DateTime $creationPanier): static
+    public function setCreationPanier(?\DateTimeImmutable $creationPanier): static
     {
         $this->creationPanier = $creationPanier;
 
         return $this;
     }
 
-    public function getModificationPanier(): ?\DateTime
+    public function getModificationPanier(): ?\DateTimeImmutable
     {
         return $this->modificationPanier;
     }
 
-    public function setModificationPanier(?\DateTime $modificationPanier): static
+    public function setModificationPanier(?\DateTimeImmutable $modificationPanier): static
     {
         $this->modificationPanier = $modificationPanier;
 

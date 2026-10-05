@@ -14,11 +14,11 @@ class LigneDeCommande
     #[ORM\Column(name: "id_ligne_de_commande", type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(name: "quantite", type: "integer", nullable: true)]
-    private ?int $quantite = null;
+    #[ORM\Column(name: "quantite", type: "integer")]
+    private int $quantite = 1;
 
-    #[ORM\Column(name: "prix_unit", type: "decimal", precision: 15, scale: 2, nullable: true)]
-    private ?string $prixUnit = null;
+    #[ORM\Column(name: "prix_unit", type: "decimal", precision: 15, scale: 2)]
+    private string $prixUnit;
 
     #[ORM\ManyToOne(targetEntity: Declinaison::class)]
     #[ORM\JoinColumn(name: "id_declinaison", referencedColumnName: "id_declinaison", nullable: false)]
@@ -40,7 +40,7 @@ class LigneDeCommande
         return $this->quantite;
     }
 
-    public function setQuantite(?int $quantite): static
+    public function setQuantite(int $quantite): static
     {
         $this->quantite = $quantite;
 
@@ -52,7 +52,7 @@ class LigneDeCommande
         return $this->prixUnit;
     }
 
-    public function setPrixUnit(?string $prixUnit): static
+    public function setPrixUnit(string $prixUnit): static
     {
         $this->prixUnit = $prixUnit;
 

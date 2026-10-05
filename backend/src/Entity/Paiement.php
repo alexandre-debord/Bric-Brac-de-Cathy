@@ -23,7 +23,7 @@ class Paiement
     #[ORM\Column(name: "status", type: "string", length: 30, nullable: true)]
     private ?string $status = null;
 
-    #[ORM\Column(name: "creation_paiement", type: "datetime", nullable: true)]
+    #[ORM\Column(name: "creation_paiement", type: "datetime_immutable", nullable: true)]
     private ?\DateTimeInterface $creationPaiement = null;
 
     #[ORM\Column(name: "montant", type: "decimal", precision: 10, scale: 2, nullable: true)]
@@ -76,12 +76,12 @@ class Paiement
         return $this;
     }
 
-    public function getCreationPaiement(): ?\DateTime
+    public function getCreationPaiement(): ?\DateTimeInterface
     {
         return $this->creationPaiement;
     }
 
-    public function setCreationPaiement(?\DateTime $creationPaiement): static
+    public function setCreationPaiement(?\DateTimeInterface $creationPaiement): static
     {
         $this->creationPaiement = $creationPaiement;
 

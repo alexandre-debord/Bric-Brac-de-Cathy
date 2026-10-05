@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: "PANIER_LIGNE")]
+#[ORM\UniqueConstraint(name: "uniq_panier_declinaison", columns: ["id_panier", "id_declinaison"])]
 class PanierLigne
 {
     #[ORM\Id]
@@ -13,8 +14,8 @@ class PanierLigne
     #[ORM\Column(name: "id_panier_ligne", type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(name: "quantite", type: "integer", nullable: true)]
-    private ?int $quantite = null;
+    #[ORM\Column(name: "quantite", type: "integer")]
+    private int $quantite = 1;
 
     #[ORM\ManyToOne(targetEntity: Panier::class)]
     #[ORM\JoinColumn(name: "id_panier", referencedColumnName: "id_panier", nullable: false, onDelete: "CASCADE")]

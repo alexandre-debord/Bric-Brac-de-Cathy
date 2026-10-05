@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity]
 #[ORM\Table(name: "IMAGE")]
@@ -18,8 +20,8 @@ class Image
 
     #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: "images")]
     #[ORM\JoinColumn(name: "id_produit", referencedColumnName: "id_produit", nullable: false, onDelete: "CASCADE")]
+    #[Ignore]
     private Produit $produit;
-    // getters/setters
 
     public function getId(): ?int
     {

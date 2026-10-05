@@ -1,10 +1,13 @@
-<?php 
+<?php
 
 namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiProperty;
 
+#[ApiResource]
 #[ORM\Entity]
 #[ORM\Table(name: "DECLINAISON")]
 class Declinaison
@@ -24,6 +27,7 @@ class Declinaison
     #[ORM\JoinColumn(name: "id_produit", referencedColumnName: "id_produit", nullable: false, onDelete: "CASCADE")]
     private Produit $produit;
 
+    #[ApiProperty(readableLink: true)]
     #[ORM\ManyToOne(targetEntity: Couleur::class)]
     #[ORM\JoinColumn(name: "id_couleur", referencedColumnName: "id_couleur", nullable: false)]
     private Couleur $couleur;

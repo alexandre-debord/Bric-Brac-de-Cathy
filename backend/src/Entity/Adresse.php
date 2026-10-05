@@ -16,7 +16,7 @@ class Adresse
     #[ORM\Column(name: "type", type: "string", length: 50, nullable: true)]
     private ?string $type = null;
 
-    #[ORM\Column(name: "rue", type: "string", length: 50, nullable: true)]
+    #[ORM\Column(name: "rue", type: "string", length: 255, nullable: true)]
     private ?string $rue = null;
 
     #[ORM\Column(name: "ville", type: "string", length: 50, nullable: true)]

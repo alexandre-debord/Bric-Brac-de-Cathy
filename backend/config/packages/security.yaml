@@ -56,9 +56,13 @@ security:
     # L'ordre est donc décroissant en spécificité : les exceptions publiques
     # d'abord, la règle générale en dernier.
     access_control:
+        - { path: ^/api/produits, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/categories, methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/login_check,    roles: PUBLIC_ACCESS }
         - { path: ^/api/register,       roles: PUBLIC_ACCESS }
         - { path: ^/api/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/api/reset-password,  roles: PUBLIC_ACCESS }
         - { path: ^/api/ping,           roles: PUBLIC_ACCESS }
+        - { path: ^/api/produits, roles: ROLE_ADMIN }
+        - { path: ^/api/categories, roles: ROLE_ADMIN }
         - { path: ^/api,                roles: IS_AUTHENTICATED_FULLY }

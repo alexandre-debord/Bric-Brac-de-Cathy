@@ -20,7 +20,7 @@ class Avis
     #[ORM\Column(name: "commentaire", type: "text", nullable: true)]
     private ?string $commentaire = null;
 
-    #[ORM\Column(name: "creation_avis", type: "datetime", nullable: true)]
+    #[ORM\Column(name: "creation_avis", type: "datetime_immutable", nullable: true)]
     private ?\DateTimeInterface $creationAvis = null;
 
     #[ORM\ManyToOne(targetEntity: Produit::class)]
@@ -62,12 +62,12 @@ class Avis
         return $this;
     }
 
-    public function getCreationAvis(): ?\DateTime
+    public function getCreationAvis(): ?\DateTimeInterface
     {
         return $this->creationAvis;
     }
 
-    public function setCreationAvis(?\DateTime $creationAvis): static
+    public function setCreationAvis(?\DateTimeInterface $creationAvis): static
     {
         $this->creationAvis = $creationAvis;
 
