@@ -1,17 +1,20 @@
-import { Container, Button, Table } from 'react-bootstrap';
+import { Container, Button, Table, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { usePanier } from '../hooks/usePanier';
 import { formaterPrix } from '../utils/formaterPrix';
+import { useState } from 'react';
 
 const Panier = () => {
   // Données et actions du panier
-  const { isEmpty, removeItem, changerQuantite, items, emptyCart, cartTotal } = usePanier();
+  const { isEmpty, supprimer, changerQuantite, items, vider, cartTotal } = usePanier();
 
+  const [erreur, setErreur] = useState(null);
   // Si le panier est vide : message + bouton vers la boutique
   if (isEmpty) {
     return (
       <Container className="py-5 text-center">
         <h1 className="mb-4">Votre panier</h1>
+        {erreur && <Alert variant="danger">{erreur}</Alert>}
         <p className="text-muted">Votre panier est vide.</p>
         <Button as={Link} to="/produits" variant="danger">
           Découvrir la boutique
@@ -20,11 +23,15 @@ const Panier = () => {
     );
   }
 
+  async function executer(action) {
+    setErreur(null);
+    try { await action(); } catch (err) { setErreur(err.message); }
+  }
   // Si le panier contient des articles : affichage du tableau
   return (
     <Container className="py-5">
       <h1 className="mb-4">Votre panier</h1>
-
+      {erreur && <Alert variant="danger">{erreur}</Alert>}
       <Table responsive className="align-middle">
         <thead>
           <tr>
@@ -65,7 +72,7 @@ const Panier = () => {
                   <Button
                     size="sm"
                     variant="outline-secondary"
-                    onClick={() => changerQuantite(item.id, item.quantity - 1)}
+                    onClick={() => executer(() => changerQuantite(item.id, item.quantity - 1))}
                     disabled={item.quantity <= 1}
                     aria-label="Diminuer la quantité"
                   >
@@ -75,7 +82,7 @@ const Panier = () => {
                   <Button
                     size="sm"
                     variant="outline-secondary"
-                    onClick={() => changerQuantite(item.id, item.quantity + 1)}
+                    onClick={() => executer(() => changerQuantite(item.id, item.quantity + 1))}
                     disabled={item.quantity >= item.stock}
                     aria-label="Augmenter la quantité"
                   >
@@ -85,7 +92,7 @@ const Panier = () => {
               </td>
               <td>{formaterPrix(item.itemTotal)}</td>
               <td>
-                <Button variant="link" className="text-danger" onClick={() => removeItem(item.id)}>
+                <Button variant="link" className="text-danger" onClick={() => executer(() => supprimer(item.id))}>
                   Supprimer
                 </Button>
               </td>
@@ -94,7 +101,7 @@ const Panier = () => {
         </tbody>
       </Table>
       <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-        <Button variant="outline-danger" onClick={emptyCart}>
+        <Button variant="outline-danger" onClick={() => executer(vider)}>
           Vider le panier
         </Button>
         <div className="text-end">

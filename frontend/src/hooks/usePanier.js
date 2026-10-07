@@ -1,11 +1,46 @@
 import { useCart } from 'react-use-cart';
+import { useAuth } from '../context/AuthContext';
+import { lignesServeurVersItems } from '../utils/panierServeur';
 
 export function usePanier() {
-  const { addItem, updateItemQuantity, getItem, ...reste } = useCart();
+  const { addItem, updateItemQuantity, getItem, setItems, removeItem, emptyCart, ...reste } = useCart();
+  const { token, estConnecte, deconnexion } = useAuth();
 
-  function ajouter(declinaison, quantite = 1) {
+  // Appelle une route du panier, puis remplace le panier local par la réponse du serveur
+  async function appelPanier(chemin, method, corps) {
+    const reponse = await fetch(`${import.meta.env.VITE_API_URL}${chemin}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: corps ? JSON.stringify(corps) : undefined,
+    });
+
+    if (reponse.status === 401) {
+     deconnexion();
+      throw new Error('Ta session a expiré, reconnecte-toi.');
+    }
+    if (!reponse.ok) {
+      const erreur = await reponse.json().catch(() => ({}));
+      throw new Error(erreur.error ?? 'Erreur serveur, réessaie plus tard.');
+    }
+
+    const panier = await reponse.json();
+    setItems(lignesServeurVersItems(panier.lignes));
+  }
+
+  async function ajouter(declinaison, quantite = 1) {
     // Garde : valide que quantite est bien un entier >= 1
     if (!Number.isInteger(quantite) || quantite < 1) return false;
+
+    if (estConnecte) {
+      await appelPanier('/api/panier/lignes', 'POST', {
+        id_declinaison: (declinaison.id_declinaison),
+        quantite: quantite,
+      });
+      return true;
+    }
 
     const id = String(declinaison.id_declinaison);
     const dejaDansPanier = getItem(id)?.quantity ?? 0;
@@ -27,8 +62,13 @@ export function usePanier() {
     return true;
   }
 
-  function changerQuantite(id, quantite) {
+  async function changerQuantite(id, quantite) {
     if (!Number.isInteger(quantite) || quantite < 1) return;
+
+    if (estConnecte) {
+      await appelPanier(`/api/panier/lignes/${id}`, 'PATCH', { quantite });
+      return;
+    }
 
     const idString = String(id);
     const ligne = getItem(idString);
@@ -38,5 +78,21 @@ export function usePanier() {
     updateItemQuantity(idString, cible);
   }
 
-  return { ajouter, changerQuantite, ...reste };
+  async function supprimer(id) {
+    if (estConnecte) {
+      await appelPanier(`/api/panier/lignes/${id}`, 'DELETE');
+      return;
+    }
+    removeItem(id);
+  }
+
+  async function vider() {
+    if (estConnecte) {
+      await appelPanier(`/api/panier`, 'DELETE');
+      return;
+    }
+    emptyCart();
+  }
+
+  return { ajouter, changerQuantite, supprimer, vider, ...reste };
 }

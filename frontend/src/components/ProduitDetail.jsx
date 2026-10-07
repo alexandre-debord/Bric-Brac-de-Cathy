@@ -33,20 +33,17 @@ const ProduitDetail = () => {
       });
   }, [id]);
 
-  function handleAjouter() {
-    const declinaison = produit.declinaisons?.find((d) => d.id === idChoisi);
-    if (!declinaison) return;
-
-    // [B] Convertis-la, puis ajoute-la au panier avec la quantité choisie
-    const ok = ajouter(versLignePanier(produit, declinaison), quantite);
-
-    // [C] Message selon le résultat
-    if (ok) {
-      setMessage({ variant: 'success', texte: "Article ajouté au panier avec succès !" });
-    } else {
-      setMessage({ variant: 'warning', texte: "Quantité indisponible." });
-    }
+async function handleAjouter() {
+  const declinaison = produit.declinaisons.find((d) => d.id === idChoisi);
+  try {
+    const ajoute = await ajouter(versLignePanier(produit, declinaison), quantite);
+    setMessage(ajoute
+      ? { variant: 'success', texte: "Article ajouté au panier avec succès !" }
+      : { variant: 'warning', texte: "Quantité indisponible."  });
+  } catch (err) {
+    setMessage({ variant: 'danger', texte: err.message });
   }
+}
 
   if (loading) {
     return (
