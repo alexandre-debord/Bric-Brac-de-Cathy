@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Nav, Offcanvas } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Offcanvas, Button } from 'react-bootstrap';
 import { List, Bag } from 'react-bootstrap-icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { usePanier } from '../hooks/usePanier';
+import { useAuth } from '../context/AuthContext';
 
 import '../css/TopBar.css';
+
+
+
 
 const TopBar = () => {
     const [showMenu, setShowMenu] = useState(false);
     const { totalItems } = usePanier();
+
+    const { estConnecte, deconnexion } = useAuth();
 
     const handleClose = () => setShowMenu(false);
     const handleShow = () => setShowMenu(true);
@@ -45,14 +51,21 @@ const TopBar = () => {
                                 <Nav.Link className="topbar-link d-none d-md-inline" as={NavLink} to="/produits">
                                     La Boutique
                                 </Nav.Link>
-                                <Nav.Link className="topbar-link d-none d-md-inline" as={NavLink} to="/connect">
-                                    Se Connecter
-                                </Nav.Link>
+                                {estConnecte ? (
+                                    <Nav.Link as="button" type="button" className="topbar-link d-none d-md-inline" onClick={deconnexion}>
+                                        Déconnexion
+                                    </Nav.Link>
+                                ) : (
+                                    <Nav.Link as={NavLink} className="topbar-link d-none d-md-inline" to="/connexion">
+                                        Se connecter
+                                    </Nav.Link>
+                                )}
+
 
                                 {/* Lien Panier : Compteur toujours visible + aria-label pour l'accessibilité */}
-                                <Nav.Link 
-                                    className="topbar-cart-link" 
-                                    as={NavLink} 
+                                <Nav.Link
+                                    className="topbar-cart-link"
+                                    as={NavLink}
                                     to="/panier"
                                     aria-label={`Panier, ${totalItems} article(s)`}
                                 >
@@ -92,9 +105,16 @@ const TopBar = () => {
                             </Nav.Link>
                         </li>
                         <li className="offcanvas-menu-item">
-                            <Nav.Link as={NavLink} to="/connect" className="offcanvas-menu-link" onClick={handleClose}>
-                                Se Connecter
-                            </Nav.Link>
+                            {estConnecte ? (
+                                <Nav.Link as="button" type="button" className="offcanvas-menu-link"
+                                    onClick={() => { deconnexion(); handleClose(); }}>
+                                    Se déconnecter
+                                </Nav.Link>
+                            ) : (
+                                <Nav.Link as={NavLink} to="/connexion" className="offcanvas-menu-link" onClick={handleClose}>
+                                    Se connecter
+                                </Nav.Link>
+                            )}
                         </li>
                         <li className="offcanvas-menu-item">
                             <Nav.Link as={NavLink} to="/contact" className="offcanvas-menu-link" onClick={handleClose}>

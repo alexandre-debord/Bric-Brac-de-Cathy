@@ -108,10 +108,9 @@ const Panier = () => {
           <p className="fs-4 mb-2">
             Total : <strong>{formaterPrix(cartTotal)}</strong>
           </p>
-          <Button variant="danger" disabled>
+          <Button as={Link} to="/commande" variant="danger">
             Commander
           </Button>
-          <div className="small text-muted mt-1">Paiement bientôt disponible</div>
         </div>
       </div>
     </Container>

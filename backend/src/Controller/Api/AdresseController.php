@@ -34,7 +34,7 @@ class AdresseController
         // longueur max de chaque champ = la "length" de la colonne dans Adresse.php
         $longueursMax = [
             'type'        => 50,
-            'rue'         => 50,
+            'rue'         => 255,
             'ville'       => 50,
             'code_postal' => 5,
             'pays'        => 50,

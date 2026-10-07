@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import { CartProvider } from 'react-use-cart'
+import { AuthProvider } from './context/AuthContext'
 
 // Nettoie un panier corrompu AVANT que CartProvider ne le lise
 // (la bibliothèque fait un JSON.parse sans protection au démarrage).
@@ -20,9 +21,11 @@ try {
 }
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <CartProvider>
+<StrictMode>
+  <CartProvider>
+    <AuthProvider>
       <App />
-    </CartProvider>
-  </StrictMode>,
+    </AuthProvider>
+  </CartProvider>
+</StrictMode>
 )
