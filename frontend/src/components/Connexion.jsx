@@ -21,7 +21,7 @@ export default function Connexion() {
             await connexion(email, motDePasse);
             navigate(location.state?.retour ?? '/', { replace: true });
         } catch (err) {
-            setErreur(err.message === 'Failed to fetch' ? 'Serveur injoignable.' : err.message);
+            setErreur(err.message);
         } finally {
             setEnvoi(false);
         }

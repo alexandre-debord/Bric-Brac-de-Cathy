@@ -5,6 +5,7 @@ import { Container, Spinner, Form, Button, Alert } from 'react-bootstrap';
 import { usePanier } from '../hooks/usePanier';
 import { versLignePanier } from '../utils/versLignePanier';
 import { formaterPrix } from '../utils/formaterPrix';
+import { apiFetch } from '../utils/apiFetch';
 
 const ProduitDetail = () => {
   const { id } = useParams();
@@ -14,24 +15,14 @@ const ProduitDetail = () => {
   const [idChoisi, setIdChoisi] = useState(null);
   const [quantite, setQuantite] = useState(1);
   const { ajouter } = usePanier();
-  const [message, setMessage] = useState(null); // { variant, texte } ou null
+  const [message, setMessage] = useState(null); 
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/produits/${id}`)
-      .then((response) => {
-        if (!response.ok) throw new Error('Produit introuvable');
-        return response.json();
-      })
-      .then((data) => {
-        setProduit(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Erreur lors de l\'extraction des données :', error.message);
-        setErreur(error.message);
-        setLoading(false);
-      });
-  }, [id]);
+useEffect(() => {
+  apiFetch(`/api/produits/${id}`)
+    .then((data) => setProduit(data))
+    .catch((err) => setErreur(err.status === 404 ? 'Produit introuvable.' : err.message))
+    .finally(() => setLoading(false));
+}, [id]);
 
 async function handleAjouter() {
   const declinaison = produit.declinaisons.find((d) => d.id === idChoisi);

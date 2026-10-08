@@ -1,32 +1,24 @@
-import { useCart } from 'react-use-cart';
-import { useAuth } from '../context/AuthContext';
-import { lignesServeurVersItems } from '../utils/panierServeur';
+import { useCart } from "react-use-cart";
+import { useAuth } from "../context/AuthContext";
+import { lignesServeurVersItems } from "../utils/panierServeur";
+import { useApi } from "./useApi";
 
 export function usePanier() {
-  const { addItem, updateItemQuantity, getItem, setItems, removeItem, emptyCart, ...reste } = useCart();
-  const { token, estConnecte, deconnexion } = useAuth();
-
+  const {
+    addItem,
+    updateItemQuantity,
+    getItem,
+    setItems,
+    removeItem,
+    emptyCart,
+    ...reste
+  } = useCart();
+  const { estConnecte } = useAuth();
+  const api = useApi();
   // Appelle une route du panier, puis remplace le panier local par la réponse du serveur
+
   async function appelPanier(chemin, method, corps) {
-    const reponse = await fetch(`${import.meta.env.VITE_API_URL}${chemin}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: corps ? JSON.stringify(corps) : undefined,
-    });
-
-    if (reponse.status === 401) {
-     deconnexion();
-      throw new Error('Ta session a expiré, reconnecte-toi.');
-    }
-    if (!reponse.ok) {
-      const erreur = await reponse.json().catch(() => ({}));
-      throw new Error(erreur.error ?? 'Erreur serveur, réessaie plus tard.');
-    }
-
-    const panier = await reponse.json();
+    const panier = await api(chemin, { method, corps });
     setItems(lignesServeurVersItems(panier.lignes));
   }
 
@@ -35,8 +27,8 @@ export function usePanier() {
     if (!Number.isInteger(quantite) || quantite < 1) return false;
 
     if (estConnecte) {
-      await appelPanier('/api/panier/lignes', 'POST', {
-        id_declinaison: (declinaison.id_declinaison),
+      await appelPanier("/api/panier/lignes", "POST", {
+        id_declinaison: declinaison.id_declinaison,
         quantite: quantite,
       });
       return true;
@@ -57,7 +49,7 @@ export function usePanier() {
         image: declinaison.image,
         stock: declinaison.stock,
       },
-      possible
+      possible,
     );
     return true;
   }
@@ -66,7 +58,7 @@ export function usePanier() {
     if (!Number.isInteger(quantite) || quantite < 1) return;
 
     if (estConnecte) {
-      await appelPanier(`/api/panier/lignes/${id}`, 'PATCH', { quantite });
+      await appelPanier(`/api/panier/lignes/${id}`, "PATCH", { quantite });
       return;
     }
 
@@ -80,7 +72,7 @@ export function usePanier() {
 
   async function supprimer(id) {
     if (estConnecte) {
-      await appelPanier(`/api/panier/lignes/${id}`, 'DELETE');
+      await appelPanier(`/api/panier/lignes/${id}`, "DELETE");
       return;
     }
     removeItem(id);
@@ -88,7 +80,7 @@ export function usePanier() {
 
   async function vider() {
     if (estConnecte) {
-      await appelPanier(`/api/panier`, 'DELETE');
+      await appelPanier(`/api/panier`, "DELETE");
       return;
     }
     emptyCart();

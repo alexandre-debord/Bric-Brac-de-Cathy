@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import { useCart } from 'react-use-cart';
 import { lignesServeurVersItems, itemsVersLignesServeur } from '../utils/panierServeur';
+import { apiFetch, ErreurApi } from '../utils/apiFetch';
 
 const AuthContext = createContext(null);
 
@@ -11,39 +12,31 @@ export function AuthProvider({ children }) {
     });
 
     async function connexion(email, motDePasse) {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login_check`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: motDePasse }),
-        });
-
-        if (!response.ok) {
-            throw new Error(
-                response.status === 401 ? 'Email ou mot de passe incorrect.' : 'Erreur serveur, réessaie plus tard.'
-            );
+        let data;
+        try {
+            data = await apiFetch('/api/login_check', {
+                method: 'POST',
+                corps: { email, password: motDePasse },
+            });
+        } catch (err) {
+            // Ici, un 401 veut dire « mauvais identifiants », pas « session expirée »
+            if (err.status === 401) {
+                throw new ErreurApi('Email ou mot de passe incorrect.', 401);
+            }
+            throw err;
         }
 
-        const data = await response.json();
         const nouveauToken = data.token;
 
         try {
-            const reponseFusion = await fetch(`${import.meta.env.VITE_API_URL}/api/panier/fusion`, {
+            const panier = await apiFetch('/api/panier/fusion', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${nouveauToken}`,
-                },
-                body: JSON.stringify({ lignes: itemsVersLignesServeur(items) }),
+                corps: { lignes: itemsVersLignesServeur(items) },
+                token: nouveauToken,
             });
-
-            if (reponseFusion.ok) {
-                const panier = await reponseFusion.json();
-                setItems(lignesServeurVersItems(panier.lignes));
-            } else {
-                console.error('Fusion du panier refusée :', reponseFusion.status);
-            }
-        } catch (e) {
-            console.error('Fusion du panier impossible :', e);
+            setItems(lignesServeurVersItems(panier.lignes));
+        } catch (err) {
+            console.error('Fusion du panier impossible :', err.message);
         }
 
         try { localStorage.setItem('token', nouveauToken); } catch { }

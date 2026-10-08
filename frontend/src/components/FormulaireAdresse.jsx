@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Form, Button, Alert, Row, Col } from 'react-bootstrap';
-import { useAuth } from '../context/AuthContext';
+import { useApi } from '../hooks/useApi';
 
 export default function FormulaireAdresse({ onCreee, onAnnuler }) {
-    const { token, deconnexion } = useAuth();
+    const api = useApi();
     const [rue, setRue] = useState('');
     const [codePostal, setCodePostal] = useState('');
     const [ville, setVille] = useState('');
@@ -16,31 +16,13 @@ export default function FormulaireAdresse({ onCreee, onAnnuler }) {
         setErreur(null);
         setEnvoi(true);
         try {
-            const reponse = await fetch(`${import.meta.env.VITE_API_URL}/api/adresses`, {
+            const nouvelle = await api('/api/adresses', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({
-                    type: 'livraison',
-                    rue,
-                    code_postal: codePostal,
-                    ville,
-                    pays,
-                }),
+                corps: { type: 'livraison', rue, code_postal: codePostal, ville, pays },
             });
-
-            if (reponse.status === 401) {
-                deconnexion();
-                throw new Error('Ta session a expiré, reconnecte-toi.');
-            }
-            if (!reponse.ok) {
-                const data = await reponse.json().catch(() => ({}));
-                throw new Error(data.error ?? "Impossible d'enregistrer l'adresse.");
-            }
-
-            const nouvelle = await reponse.json();
             onCreee(nouvelle);
         } catch (err) {
-            setErreur(err.message === 'Failed to fetch' ? 'Serveur injoignable.' : err.message);
+            setErreur(err.message);
         } finally {
             setEnvoi(false);
         }

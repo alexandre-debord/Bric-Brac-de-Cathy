@@ -1,34 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import ProduitCard from './ProduitCard';
+import { apiFetch } from '../utils/apiFetch';
 
 
 
 function moyennePrix(declinaison) {
-    const somme = declinaison.reduce((total, declinaison) => {
-     
+  const somme = declinaison.reduce((total, declinaison) => {
+
     const prixNumerique = parseFloat(declinaison?.prix);
-        return total + (isNaN(prixNumerique) ? 0 : prixNumerique);
+    return total + (isNaN(prixNumerique) ? 0 : prixNumerique);
   }, 0);
   return declinaison.length > 0 ? somme / declinaison.length : 0;
- 
+
 }
 
 export const Produits = () => {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState(null);
 
   useEffect(() => {
-   fetch(`${import.meta.env.VITE_API_URL}/api/produits`)
-      .then((response) => response.json())
-      .then((data) => {
-        setProduits(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-      });
+    apiFetch(`/api/produits`)
+      .then((data) => setProduits(data))
+      .catch((err) => setErreur(err.message))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (erreur) {
+    return (
+      <Container className="text-center my-5">
+        <p className="text-danger">{erreur}</p>
+      </Container>
+    );
+  }
 
   if (loading) {
     return (
@@ -47,7 +52,7 @@ export const Produits = () => {
         {produits.map((produit) => (
           <Col key={produit.id} xs={12} sm={6} md={4} lg={3}>
             <ProduitCard
-            id={produit.id}
+              id={produit.id}
               nomDuProduit={produit.nomDuProduit}
               description={produit.description}
               urlImage={produit.images?.[0]?.urlImage}

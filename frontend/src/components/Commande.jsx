@@ -6,10 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import { usePanier } from '../hooks/usePanier';
 import { formaterPrix } from '../utils/formaterPrix';
 import FormulaireAdresse from './FormulaireAdresse';
+import { useApi } from '../hooks/useApi';
+
 
 
 export default function Commande() {
-    const { token, estConnecte, deconnexion } = useAuth();
+    const { estConnecte } = useAuth();
+    const api = useApi();
     const { items, isEmpty, cartTotal } = usePanier();
     const location = useLocation();
 
@@ -23,23 +26,13 @@ export default function Commande() {
     const [envoiCommande, setEnvoiCommande] = useState(false);
 
     useEffect(() => {
-        if (!estConnecte) return; // pas de token : rien à charger
+        if (!estConnecte) return;
 
-        fetch(`${import.meta.env.VITE_API_URL}/api/adresses`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((reponse) => {
-                if (reponse.status === 401) {
-                    deconnexion();
-                    throw new Error('Ta session a expiré, reconnecte-toi.');
-                }
-                if (!reponse.ok) throw new Error('Impossible de charger tes adresses.');
-                return reponse.json();
-            })
+        api('/api/adresses')
             .then((data) => setAdresses(data))
             .catch((err) => setErreur(err.message))
             .finally(() => setChargement(false));
-    }, [estConnecte, deconnexion, token]);
+    }, [estConnecte,api]);
 
     if (!estConnecte) {
         return <Navigate to="/connexion" state={{ retour: location.pathname }} replace />;
@@ -61,26 +54,14 @@ export default function Commande() {
         setErreur(null);
         setEnvoiCommande(true);
         try {
-            const reponse = await fetch(`${import.meta.env.VITE_API_URL}/api/commandes`, {
+            const commande = await api('/api/commandes', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ id_adresse_livraison: idLivraison }),
+                corps: { id_adresse_livraison: idLivraison },
             });
-
-            if (reponse.status === 401) {
-                deconnexion();
-                throw new Error('Ta session a expiré, reconnecte-toi.');
-            }
-            if (!reponse.ok) {
-                const data = await reponse.json().catch(() => ({}));
-                throw new Error(data.error ?? 'La commande a échoué, réessaie plus tard.');
-            }
-
-            const commande = await reponse.json();
             navigate('/commande/confirmation', { replace: true, state: { commande } });
             emptyCart();
         } catch (err) {
-            setErreur(err.message === 'Failed to fetch' ? 'Serveur injoignable.' : err.message);
+            setErreur(err.message);
         } finally {
             setEnvoiCommande(false);
         }
