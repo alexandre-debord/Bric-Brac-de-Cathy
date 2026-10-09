@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;   // Attribute, PAS Annotation (Symfony 8)
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 // AbstractController fournit des raccourcis comme $this->json().
 // Sans l'étendre, il faudrait construire les réponses HTTP à la main.
@@ -99,8 +100,11 @@ class AuthController extends AbstractController
         // flush() exécute réellement la requête SQL.
         // Les deux sont nécessaires pour un objet neuf.
         $em->persist($user);
-        $em->flush();
-
+        try {
+            $em->flush();
+        } catch (UniqueConstraintViolationException) {
+            return $this->json(['errors' => ['email' => ['Cet email est déjà utilisé.']]], 409);
+        }
         // ─── 6. Répondre ───
         // getId() ne renvoie une valeur qu'APRÈS le flush : l'id vient de
         // l'auto-increment de MySQL, il n'existe pas avant l'INSERT.
@@ -182,7 +186,7 @@ class AuthController extends AbstractController
             'message' => 'Si un compte existe avec cette adresse, un lien de réinitialisation a été envoyé.',
             // TEMPORAIRE — à retirer quand Mailer sera configuré.
             // En production ce jeton part par email, jamais dans la réponse HTTP.
-            'token' => $token,
+            'token' => $this->getParameter('kernel.environment') === 'dev' ? $token : null,
         ]);
     }
 

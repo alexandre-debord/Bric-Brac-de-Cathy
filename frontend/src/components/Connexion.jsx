@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -46,6 +46,10 @@ export default function Connexion() {
                     {envoi ? 'Connexion…' : 'Se connecter'}
                 </Button>
             </Form>
+            <p className="text-center mt-3 small">
+                Pas encore de compte ?{' '}
+                <Link to="/inscription" state={location.state}>Créer un compte</Link>
+            </p>
         </Container>
     );
 }

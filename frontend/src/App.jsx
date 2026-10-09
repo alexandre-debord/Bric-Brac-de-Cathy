@@ -11,6 +11,7 @@ import ProduitDetail from './components/ProduitDetail.jsx';
 import Connexion from './components/Connexion.jsx';
 import Commande from './components/Commande.jsx';
 import Confirmation from './components/Confirmation.jsx';
+import Inscription from './components/Inscription.jsx';
 
 function App() {
     return (
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/connexion" element={<Connexion />} />
                     <Route path="/commande" element={<Commande />} />
                     <Route path="/commande/confirmation" element={<Confirmation />} />
+                    <Route path="/inscription" element={<Inscription />} />
 
                     {/* Route attrape-tout pour éviter la page blanche sur des liens non définis (ex: /connect, /contact) */}
                     <Route path="*" element={<p className="text-center py-5">Page introuvable</p>} />

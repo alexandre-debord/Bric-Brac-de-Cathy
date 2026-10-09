@@ -1,7 +1,8 @@
 export class ErreurApi extends Error {
-  constructor(message, status) {
-    super(message);        // donne le message à la classe Error parente
-    this.status = status;  // 0 = serveur injoignable
+  constructor(message, status, champs = null) {
+    super(message);
+    this.status = status;
+    this.champs = champs; // ex. { email: ["Format d'email invalide."] }
   }
 }
 
@@ -26,7 +27,11 @@ export async function apiFetch(chemin, { method = 'GET', corps, token } = {}) {
   const data = await reponse.json().catch(() => null);
 
   if (!reponse.ok) {
-    throw new ErreurApi(data?.error ?? 'Erreur serveur, réessaie plus tard.', reponse.status);
+    throw new ErreurApi(
+      data?.error ?? (data?.errors ? 'Certains champs sont invalides.' : 'Erreur serveur, réessaie plus tard.'),
+      reponse.status,
+      data?.errors ?? null,
+    );
   }
   return data;
 }
