@@ -1,10 +1,14 @@
  import { Container, Row, Col, Nav, Offcanvas } from 'react-bootstrap';
+ import HeroAccueil from './components/accueil/HeroAccueil';
+ import SelectionAccueil from './components/accueil/SelectionAccueil';
+ import PresentationAccueil from './components/accueil/PresentationAccueil';
  
- export default function Accueil() {
-     return (
-       <Container className="py-5">
-         <h1 className='text-center'>Le Bric à Brac de Cathy</h1>
-         </Container>
-       
-     );
-   }
+export default function Accueil() {
+  return (
+    <>
+      <HeroAccueil />
+      <SelectionAccueil />
+      <PresentationAccueil />
+    </>
+  );
+}

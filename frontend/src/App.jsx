@@ -13,6 +13,7 @@ import Commande from './components/Commande.jsx';
 import Confirmation from './components/Confirmation.jsx';
 import Inscription from './components/Inscription.jsx';
 
+
 function App() {
     return (
         <BrowserRouter>

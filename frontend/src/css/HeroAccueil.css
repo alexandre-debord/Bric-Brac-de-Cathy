@@ -1,0 +1,78 @@
+/* Mobile d'abord : texte et image empilés */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.hero-texte {
+  background: var(--bordeaux);
+  color: #fff;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.hero-surtitre {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  color: #e6a59f;
+  margin: 0;
+}
+
+.hero-titre {
+  font-family: var(--police-titre);
+  font-size: clamp(2.75rem, 7vw, 4.5rem);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.hero-intro {
+  max-width: 28rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hero-bouton {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--bordeaux);
+  border-radius: 999px;
+  padding: 0.6rem 1.6rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+.hero-bouton:hover,
+.hero-bouton:focus-visible {
+  background: var(--creme);
+}
+
+.hero-image {
+  height: 18rem;
+}
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* À partir de la tablette : deux colonnes */
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    min-height: 34rem;
+  }
+  .hero-image {
+    height: auto;
+  }
+}
+
+@media (min-width: 992px) {
+  .hero-texte {
+    padding: 4rem 5rem;
+  }
+}

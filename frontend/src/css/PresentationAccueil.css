@@ -1,0 +1,81 @@
+/* ==========================================================================
+   PresentationAccueil.css — section "Le Geste de l'Artisane" de l'accueil
+   Miroir de la bannière : photo à gauche, panneau bordeaux à droite.
+   Mobile d'abord : photo puis texte empilés, deux colonnes à partir de 768px.
+   ========================================================================== */
+
+.presentation {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* Photo */
+.presentation-image {
+  height: 18rem;
+}
+.presentation-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Panneau texte bordeaux */
+
+.presentation-texte {
+  background: var(--bordeaux);
+  color: var(--blanc);
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+/* Sur-titre */
+
+.presentation .presentation-surtitre {
+  color: var(--accent-clair, rgba(255, 255, 255, 0.8));
+  margin: 0;
+}
+
+/* Titre */
+
+.presentation-titre {
+  font-family: var(--police-titre);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.15;
+  margin: 0;
+}
+.presentation-titre em {
+  font-style: italic;
+  color: inherit;   /* reste blanc */
+}
+
+.presentation-paragraphe {
+  max-width: 30rem;
+  line-height: 1.7;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Tablette */
+
+@media (min-width: 768px) {
+  .presentation {
+    grid-template-columns: 1fr 1fr;
+    min-height: 32rem;
+  }
+  .presentation-image {
+    height: auto;
+  }
+}
+
+/* Ordinateur*/
+
+@media (min-width: 992px) {
+  .presentation-texte {
+    padding: 4rem 5rem;
+  }
+}

@@ -1,0 +1,132 @@
+
+.selection {
+  background: var(--creme);
+  padding: 4rem 1.5rem;
+}
+
+/* En-tête */
+
+.selection-entete {
+  max-width: 1100px;
+  margin: 0 auto 2.5rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.selection-titre {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  margin: 0.5rem 0 0;
+}
+
+.selection-intro {
+  color: var(--texte-doux);
+  line-height: 1.6;
+  max-width: 26rem;
+  margin: 0;
+}
+
+/* Grille des produits */
+
+.selection-grille {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 160px;
+  gap: 1rem;
+}
+
+/* Carte */
+
+.selection-carte {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: linear-gradient(to bottom, var(--creme-fonce), #b9b2a8);
+}
+
+/* Sur mobile */
+
+.selection-carte--grande {
+  grid-column: span 2;
+}
+
+/* Toute la carte est un lien */
+
+.selection-lien {
+  position: relative;
+  display: block;
+  height: 100%;
+  color: var(--blanc);
+  text-decoration: none;
+}
+.selection-lien:hover {
+  color: var(--blanc);
+}
+
+.selection-lien img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.selection-lien:hover img {
+  transform: scale(1.05);
+}
+
+/* Dégradé sombre en bas pour la lisibilité du nom */
+
+.selection-lien::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 55%);
+}
+
+.selection-nom {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1;               /* au-dessus du dégradé */
+  font-family: var(--police-titre);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.selection-carte--grande .selection-nom {
+  font-size: 1.6rem;
+}
+
+/* Focus clavier */
+
+.selection-lien:focus-visible {
+  outline: 3px solid var(--blanc);
+  outline-offset: -6px;
+}
+
+/* Tablette et plus  */
+
+@media (min-width: 768px) {
+  .selection {
+    padding: 5rem 2rem;
+  }
+  .selection-entete {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+  .selection-intro {
+    justify-self: end;
+  }
+  .selection-grille {
+    grid-template-columns: 2fr 1fr;
+    grid-auto-rows: 200px;
+  }
+  .selection-carte--grande {
+    grid-column: auto;
+    grid-row: span 2;      
+  }
+}
