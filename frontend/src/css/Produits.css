@@ -1,28 +1,19 @@
-/* ==========================================================================
-   GRILLE ET CONTENEUR
-   ========================================================================== */
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 24px;
-  padding: 20px 0;
-}
-
-/* ==========================================================================
-   CARTE PRODUIT
-   ========================================================================== */
 
 .product-card {
   position: relative;
   overflow: hidden;
   border-radius: 4px;
-  aspect-ratio: 1 / 1; /* Carte parfaitement carrée */
-  cursor: pointer;
-  background-color: #2a2a2a;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(to bottom, var(--creme-fonce), #b9b2a8);
 }
 
-/* Image de fond */
+/* Navigation au clavier sur la carte */
+.product-card:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+
 .product-card-img {
   width: 100%;
   height: 100%;
@@ -31,38 +22,31 @@
   transition: transform 0.4s ease;
 }
 
-/* Léger zoom au survol de la carte */
 .product-card:hover .product-card-img {
   transform: scale(1.05);
 }
 
-/* ==========================================================================
-   BADGE PRIX (Haut à droite)
-   ========================================================================== */
+/* Badge prix */
 
 .product-card-price-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background-color: #ffffff;
-  color: #c85a54;
-  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 2;
+  background-color: var(--blanc);
+  color: var(--accent);
   font-size: 0.85rem;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 2px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  z-index: 2;
 }
 
-/* ==========================================================================
-   OVERLAY TEXTE (Bas à gauche)
-   ========================================================================== */
+/* Dégradé sombre en bas pour garantir la lisibilité du texte blanc */
 
 .product-card-overlay {
   position: absolute;
   inset: 0;
-  /* Dégradé noir pour garantir la lisibilité du texte blanc */
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.8) 0%,
@@ -72,58 +56,66 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 16px;
+  padding: 16px 64px 16px 16px;   /* place à droite pour le bouton + */
   pointer-events: none;
 }
 
 .product-card-title {
-  color: #ffffff;
-  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--blanc);
+  font-family: var(--police-titre);
   font-size: 1.25rem;
-  font-weight: normal;
-  margin: 0;
+  font-weight: 400;
   line-height: 1.2;
+  margin: 0;
 }
 
 .product-card-subtitle {
-  color: #d1d1d1;
-  font-family: system-ui, -apple-system, sans-serif;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.8rem;
-  margin: 4px 0 0 0;
+  margin: 4px 0 0;
 }
 
-/* ==========================================================================
-   BOUTON + ROND ROUGE (Apparition au survol)
-   ========================================================================== */
+/* Bouton rond */
 
 .product-card-add-btn {
   position: absolute;
   bottom: 16px;
   right: 16px;
+  z-index: 3;
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background-color: #6b1124; /* Rouge bordeaux */
-  color: #ffffff;
   border: none;
+  background-color: var(--bordeaux);
+  color: var(--blanc);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
-  z-index: 3;
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
 }
 
-/* État au survol de la carte */
-.product-card:hover .product-card-add-btn {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Survol direct du bouton */
 .product-card-add-btn:hover {
-  background-color: #8c1630;
+  background-color: var(--bordeaux-fonce);
 }
+
+.product-card-add-btn:focus-visible {
+  outline: 2px solid var(--blanc);
+  outline-offset: 2px;
+}
+
+/* Seulement sur les appareils qui ONT un survol*/
+
+@media (hover: hover) {
+  .product-card-add-btn {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  .product-card:hover .product-card-add-btn,
+  .product-card:focus-within .product-card-add-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
