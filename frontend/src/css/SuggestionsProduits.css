@@ -1,0 +1,117 @@
+/* ==========================================================================
+   SuggestionsProduits.css — "Vous aimerez aussi le reste de la collection"
+   Mobile : cartes en défilement horizontal. À partir de 768px : 3 colonnes.
+   ========================================================================== */
+
+.suggestions {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 4rem;
+}
+
+/* En-tête : titre à gauche, "Voir tout" à droite */
+.suggestions-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.suggestions-titre {
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-weight: 400;
+  margin: 0;
+}
+
+.suggestions-voir-tout {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bordeaux);
+  text-underline-offset: 4px;
+}
+.suggestions-voir-tout:hover {
+  color: var(--bordeaux-fonce);
+}
+
+/* Liste : défilement horizontal sur mobile (chaque carte = 70 % de la largeur) */
+.suggestions-liste {
+  list-style: none;
+  padding: 0 0 0.5rem;
+  margin: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 70%;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;   /* la carte "s'aimante" quand on lâche */
+}
+.suggestions-liste > li {
+  scroll-snap-align: start;
+}
+
+/* Carte blanche */
+.suggestion-carte {
+  display: block;
+  height: 100%;
+  background: var(--blanc);
+  border-radius: 6px;
+  padding: 0.6rem 0.6rem 0.9rem;
+  color: var(--texte);
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+.suggestion-carte:hover {
+  color: var(--texte);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+.suggestion-carte:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+
+.suggestion-image {
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--creme-fonce), #b9b2a8);
+  margin-bottom: 0.75rem;
+}
+.suggestion-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.suggestion-carte:hover .suggestion-image img {
+  transform: scale(1.04);
+}
+
+.suggestion-nom {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.suggestion-prix {
+  display: block;
+  font-family: var(--police-titre);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--bordeaux);
+  margin-top: 0.15rem;
+}
+
+/* Tablette et plus : 3 colonnes, plus de défilement */
+@media (min-width: 768px) {
+  .suggestions-liste {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, 1fr);
+    overflow-x: visible;
+  }
+}
