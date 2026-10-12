@@ -16,7 +16,7 @@ const Panier = () => {
         <h1 className="mb-4">Votre panier</h1>
         {erreur && <Alert variant="danger">{erreur}</Alert>}
         <p className="text-muted">Votre panier est vide.</p>
-        <Button as={Link} to="/produits" variant="danger">
+        <Button as={Link} to="/produits" variant="bordeaux">
           Découvrir la boutique
         </Button>
       </Container>
@@ -108,7 +108,7 @@ const Panier = () => {
           <p className="fs-4 mb-2">
             Total : <strong>{formaterPrix(cartTotal)}</strong>
           </p>
-          <Button as={Link} to="/commande" variant="danger">
+          <Button as={Link} to="/commande" variant="bordeaux">
             Commander
           </Button>
         </div>

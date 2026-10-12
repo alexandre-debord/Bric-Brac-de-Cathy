@@ -17,7 +17,7 @@ export default function Confirmation() {
         return (
             <Container className="py-5 text-center">
                 <p className="text-muted">Aucune commande à afficher.</p>
-                <Button as={Link} to="/" variant="danger">Retour à l'accueil</Button>
+                <Button as={Link} to="/" variant="bordeaux">Retour à l'accueil</Button>
             </Container>
         );
     }
@@ -30,7 +30,7 @@ export default function Confirmation() {
             </Alert>
             <p>Total : <strong>{formaterPrix(Number(commande.total_ht))}</strong></p>
             <p className="text-muted">Statut : {LIBELLES_STATUT[commande.statut] ?? commande.statut}</p>
-            <Button as={Link} to="/produits" variant="outline-danger">Continuer mes achats</Button>
+            <Button as={Link} to="/produits" variant="bordeaux">Continuer mes achats</Button>
         </Container>
     );
 }

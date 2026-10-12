@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Nav, Offcanvas, Button } from 'react-bootstrap';
+import { useState } from 'react';
+import { Container, Row, Col, Nav, Offcanvas} from 'react-bootstrap';
 import { List, Bag } from 'react-bootstrap-icons';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { usePanier } from '../hooks/usePanier';
 import { useAuth } from '../context/AuthContext';
 
@@ -22,13 +22,14 @@ const TopBar = () => {
     return (
         <>
             <header className="topbar-custom">
-                <Container fluid className="px-3 px-md-4">
+                <Container fluid className="px-3 px-lg-4">
                     <Row className="align-items-center">
 
-                        {/* Gauche : Bouton MENU (Visible UNIQUEMENT sur mobile/tablette) */}
-                        <Col xs={3} md={4} className="d-flex align-items-center">
+                        {/* menu responsive */}
+
+                        <Col xs={3} lg={4} className="d-flex align-items-center">
                             <button
-                                className="topbar-menu-btn d-md-none"
+                                className="topbar-menu-btn d-lg-none"
                                 type="button"
                                 aria-label="Ouvrir le menu"
                                 onClick={handleShow}
@@ -39,30 +40,31 @@ const TopBar = () => {
                         </Col>
 
                         {/* Centre : Titre de la marque */}
-                        <Col xs={6} md={4} className="text-center">
+
+                        <Col xs={6} lg={4} className="text-center">
                             <Nav.Link className="topbar-brand" as={NavLink} to="/">
                                 Le Bric à Brac de Cathy
                             </Nav.Link>
                         </Col>
 
                         {/* Droite : Liens */}
-                        <Col xs={3} md={4}>
+                        <Col xs={3} lg={4}>
                             <div className="topbar-right">
-                                <Nav.Link className="topbar-link d-none d-md-inline" as={NavLink} to="/produits">
+                                <Nav.Link className="topbar-link d-none d-lg-inline" as={NavLink} to="/produits">
                                     La Boutique
                                 </Nav.Link>
                                 {estConnecte ? (
-                                    <Nav.Link as="button" type="button" className="topbar-link d-none d-md-inline" onClick={deconnexion}>
+                                    <Nav.Link as="button" type="button" className="topbar-link d-none d-lg-inline" onClick={deconnexion}>
                                         Déconnexion
                                     </Nav.Link>
                                 ) : (
-                                    <Nav.Link as={NavLink} className="topbar-link d-none d-md-inline" to="/connexion">
+                                    <Nav.Link as={NavLink} className="topbar-link d-none d-lg-inline" to="/connexion">
                                         Se connecter
                                     </Nav.Link>
                                 )}
 
 
-                                {/* Lien Panier : Compteur toujours visible + aria-label pour l'accessibilité */}
+                                {/* Panier */}
                                 <Nav.Link
                                     className="topbar-cart-link"
                                     as={NavLink}
@@ -80,6 +82,7 @@ const TopBar = () => {
             </header>
 
             {/* Panneau latéral Burger */}
+            
             <Offcanvas
                 show={showMenu}
                 onHide={handleClose}
@@ -87,7 +90,7 @@ const TopBar = () => {
                 className="offcanvas-custom"
             >
                 <Offcanvas.Header closeButton className="px-4 pt-4">
-                    <Offcanvas.Title className="text-uppercase fs-6 offcanvas-title-spaced text-muted">
+                    <Offcanvas.Title className="text-uppercase fs-6 offcanvas-title-spaced ">
                         Navigation
                     </Offcanvas.Title>
                 </Offcanvas.Header>

@@ -1,5 +1,83 @@
-  #root {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+
+:root {
+  /* Couleurs de marque */
+  --bordeaux: #6E1220;        
+  --bordeaux-fonce: #520d1c;    
+  --accent: #a6453f;            
+  /* Fonds */
+  --creme: #f8f5f0;             /* fond de page */
+  --creme-fonce: #f1ebe2;       /* cartes */
+  --blanc: #ffffff;
+
+  /* Textes : 2 gris au lieu de 10 */
+  --texte: #1A1A1A;
+  --texte-doux: #6b6b6b;       
+  --bordure: #e2dacd;
+
+  /* Polices — à confirmer dans Figma (onglet Inspect) */
+  --police-titre: Georgia, 'Times New Roman', serif;
+  --police-texte: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* On donne nos valeurs à Bootstrap  */
+  --bs-body-font-family: var(--police-texte);
+  --bs-body-color: var(--texte);
+  --bs-body-bg: var(--creme);
+  --bs-link-color-rgb: 110, 18, 32;       
+  --bs-link-hover-color-rgb: 82, 13, 28;  
+}
+
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contour visible pour la navigation au clavier, partout sur le site */
+:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+
+
+/* Petit libellé en majuscules */
+
+.libelle {
+  font-family: var(--police-texte);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Titre serif */
+
+.titre-serif {
+  font-family: var(--police-titre);
+  font-weight: 400;
+  color: var(--texte);
+}
+.titre-serif em {
+  font-style: italic;
+  color: var(--bordeaux);
+}
+
+/* Bouton principal bordeaux*/
+
+.btn-bordeaux {
+  --bs-btn-bg: var(--bordeaux);
+  --bs-btn-border-color: var(--bordeaux);
+  --bs-btn-color: var(--blanc);
+  --bs-btn-hover-bg: var(--bordeaux-fonce);
+  --bs-btn-hover-border-color: var(--bordeaux-fonce);
+  --bs-btn-hover-color: var(--blanc);
+  --bs-btn-active-bg: var(--bordeaux-fonce);
+  --bs-btn-active-border-color: var(--bordeaux-fonce);
+  --bs-btn-active-color: var(--blanc);
+  --bs-btn-disabled-bg: var(--bordeaux);
+  --bs-btn-disabled-border-color: var(--bordeaux);
+  --bs-btn-disabled-color: var(--blanc);
+  --bs-btn-focus-shadow-rgb: 110, 18, 32;
+  letter-spacing: 0.08em;
+}

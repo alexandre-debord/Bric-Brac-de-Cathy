@@ -43,7 +43,7 @@ export default function Commande() {
             <Container className="py-5 text-center">
                 <h1 className="mb-4">Finaliser ma commande</h1>
                 <p className="text-muted">Ton panier est vide.</p>
-                <Button as={Link} to="/produits" variant="danger">Découvrir la boutique</Button>
+                <Button as={Link} to="/produits" variant="bordeaux">Découvrir la boutique</Button>
             </Container>
         );
     }
@@ -120,7 +120,7 @@ export default function Commande() {
             )}
 
             <div className="d-grid mt-4">
-                <Button variant="danger" size="lg" onClick={handleCommander}
+                <Button variant="bordeaux" size="lg" onClick={handleCommander}
                     disabled={!idLivraison || envoiCommande}>
                     {envoiCommande ? 'Validation…' : 'Valider la commande'}
                 </Button>

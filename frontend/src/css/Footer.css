@@ -1,103 +1,86 @@
-/* Container global du footer */
+
 .footer-custom {
-  background-color: #f8f5f0;
-  color: #333333;
-  font-family: Georgia, 'Times New Roman', serif;
-  padding-top: 50px;
-  padding-bottom: 30px;
-  text-align: left;
+  background-color: var(--creme);
+  border-top: 1px solid var(--bordure);
+  color: var(--texte);
+  padding-block: 50px 30px;
 }
 
-/* Titres */
-.footer-title-main {
-  font-family: Georgia, serif;
+/* Nom de la boutique */
+
+.footer-marque {
+  font-family: var(--police-titre);
   font-size: 1.8rem;
-  font-weight: bold;
-  color: #1a1a1a;
+  font-weight: 700;
   line-height: 1.1;
-  margin: 0;
+  color: var(--texte);
+  margin: 0 0 15px;
 }
-
-.footer-title-sub {
-  font-family: Georgia, serif;
-  font-style: italic;
+.footer-marque em {
+  display: block;            /* passe à la ligne*/
   font-size: 1.6rem;
-  color: #c85a54;
+  font-weight: 400;
+  color: var(--accent);
   margin-top: 2px;
+}
+
+/* Titres de colonnes */
+
+.footer-custom .libelle {
   margin-bottom: 15px;
 }
 
-.footer-section-title {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 1.5px;
-  color: #c85a54;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-bottom: 15px;
-}
-
-/* Textes et Liens */
 .footer-text {
-  font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.85rem;
-  color: #555555;
+  color: var(--texte-doux);
   line-height: 1.5;
   max-width: 320px;
   margin: 0;
 }
 
 .footer-nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.85rem;
   line-height: 2;
 }
 
 .footer-link {
-  color: #444444;
+  color: var(--texte);
   text-decoration: none;
+  padding: 0.15rem 0;        /* annule le padding de .nav-link pour aligner à gauche */
   transition: color 0.2s ease;
 }
-
-.footer-link:hover {
-  color: #c85a54;
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
 }
 
-/* Section Contact */
+/* Contact */
 .footer-contact-item {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.85rem;
 }
 
 .footer-icon {
   margin-right: 8px;
-  color: #777777;
+  color: var(--texte-doux);
   flex-shrink: 0;
 }
 
 .footer-contact-note {
   font-size: 0.8rem;
-  color: #666666;
+  color: var(--texte-doux);
   line-height: 1.4;
   margin-top: 10px;
   max-width: 280px;
 }
 
-/* Ligne de séparation et copyright */
+/* Bas de page */
 .footer-bottom-row {
-  border-top: 1px solid #e2dacd;
+  border-top: 1px solid var(--bordure);
   padding-top: 20px;
-  font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.75rem;
-  color: #666666;
-}
-
-.footer-heart {
-  color: #c85a54;
+  color: var(--texte-doux);
 }

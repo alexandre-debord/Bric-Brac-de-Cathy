@@ -1,48 +1,27 @@
-/* Barre de navigation principale */
+/* Barre principale */
+
 .topbar-custom {
-  background-color: #6b1124; /* Rouge bordeaux foncé */
-  padding-top: 12px;
-  padding-bottom: 12px;
-  color: #ffffff;
+  background-color: var(--bordeaux);
+  color: var(--blanc);
+  padding-block: 12px;
 }
 
-/* Bouton / Lien MENU à gauche */
-.topbar-menu-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: none;
-}
+/* Nom de la boutique, au centre */
 
-.topbar-menu-btn:hover {
-  color: #e0d0d0;
-}
-
-/* Titre centré */
 .topbar-brand {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--police-titre);
   font-style: italic;
   font-size: 1.25rem;
-  color: #ffffff;
-  text-decoration: none;
   letter-spacing: 0.5px;
+  color: var(--blanc);
+  text-decoration: none;
 }
-
 .topbar-brand:hover {
-  color: #ffffff;
+  color: var(--blanc);
 }
 
-/* Section de droite (Navigation + Panier) */
+/* Zone de droite */
+
 .topbar-right {
   display: flex;
   align-items: center;
@@ -50,57 +29,86 @@
   gap: 24px;
 }
 
-.topbar-link {
-  color: #ffffff;
+/* Style commun : bouton MENU, liens et panier  */
+
+.topbar-menu-btn,
+.topbar-link,
+.topbar-cart-link {
+  color: var(--blanc);
   text-decoration: none;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--police-texte);
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 2px;
   text-transform: uppercase;
   transition: opacity 0.2s ease;
+  white-space: nowrap;
 }
 
-.topbar-link:hover {
-  color: #ffffff;
-  opacity: 0.8;
+.topbar-menu-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
 }
 
-/* Bouton du panier */
+.topbar-link {
+  letter-spacing: 0.15em;
+}
+
 .topbar-cart-link {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffffff;
-  text-decoration: none;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
+/* Survol : même effet partout, la couleur reste blanche */
+
+.topbar-menu-btn:hover,
+.topbar-link:hover,
 .topbar-cart-link:hover {
-  color: #ffffff;
+  color: var(--blanc);
   opacity: 0.8;
 }
 
-/* Style du panneau Offcanvas (Menu Burger) */
+/* Navigation au clavier : contour blanc (le bordeaux global serait invisible ici) */
+
+.topbar-menu-btn:focus-visible,
+.topbar-link:focus-visible,
+.topbar-cart-link:focus-visible,
+.topbar-brand:focus-visible {
+  outline: 2px solid var(--blanc);
+  outline-offset: 4px;
+}
+
 .offcanvas-custom {
-  background-color: #1a1a1a !important; /* Fond noir / anthracite */
-  color: #ffffff !important;
-  width: 320px !important;
+  --bs-offcanvas-bg: var(--texte);
+  --bs-offcanvas-color: var(--blanc);
+  --bs-offcanvas-width: 320px;
 }
 
-/* Bouton de fermeture (Croix) */
+/* Croix de fermeture en blanc */
+
 .offcanvas-custom .btn-close {
-  filter: invert(1); /* Passe la croix en blanc */
+  filter: invert(1);
 }
 
-/* Contenu du menu */
+/* Titre "Navigation" du menu  */
+
+.offcanvas-title-spaced {
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .offcanvas-menu-list {
   list-style: none;
   padding: 0;
-  margin: 40px 0 0 0;
+  margin: 40px 0 0;
 }
 
 .offcanvas-menu-item {
@@ -108,24 +116,27 @@
 }
 
 .offcanvas-menu-link {
-  color: #ffffff;
+  color: var(--blanc);
   text-decoration: none;
-  font-family: Georgia, serif;
+  font-family: var(--police-titre);
   font-size: 1.5rem;
   transition: opacity 0.2s ease;
 }
-
 .offcanvas-menu-link:hover {
-  color: #ffffff;
+  color: var(--blanc);
   opacity: 0.7;
 }
+.offcanvas-menu-link:focus-visible {
+  outline: 2px solid var(--blanc);
+  outline-offset: 4px;
+}
 
-/* Infos complémentaires en bas de menu */
+/* Bas du menu : blancs transparents, qui s'adaptent au fond sombre */
+
 .offcanvas-footer-info {
-  font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.85rem;
-  color: #888888;
-  border-top: 1px solid #333333;
+  color: rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   padding-top: 20px;
   margin-top: auto;
 }
