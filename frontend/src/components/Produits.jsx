@@ -1,25 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { useSearchParams } from 'react-router-dom';
+import { Container, Spinner } from 'react-bootstrap';
 import ProduitCard from './ProduitCard';
 import { apiFetch } from '../utils/apiFetch';
 import { urlImageProduit } from '../utils/urlImageProduit';
+import { resumePrix } from '../utils/resumePrix';
+import '../css/Catalogue.css';
 
-
-
-function resumePrix(declinaisons) {
-  if (!declinaisons || declinaisons.length === 0) return null;   // produit sans déclinaison
-  const prix = declinaisons.map((d) => Number(d.prix));
-  const min = Math.min(...prix);
-  const plusieursPrix = prix.some((p) => p !== min);
-  return { min, plusieursPrix };
-}
 export const Produits = () => {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    apiFetch(`/api/produits`)
+    apiFetch('/api/produits')
       .then((data) => setProduits(data))
       .catch((err) => setErreur(err.message))
       .finally(() => setLoading(false));
@@ -43,27 +38,72 @@ export const Produits = () => {
     );
   }
 
+  // Catégorie active lue dans l'URL : "?categorie=2" → 2 ; absente ou invalide → null (= Tout)
+  const idCategorie = Number(searchParams.get('categorie')) || null;
+
+  // Catégories uniques présentes dans les produits (la Map dédoublonne par id)
+  const categories = [
+    ...new Map(
+      produits
+        .filter((p) => p.categorie)
+        .map((p) => [p.categorie.id, p.categorie])
+    ).values(),
+  ];
+
+  const produitsAffiches = idCategorie === null
+    ? produits
+    : produits.filter((p) => p.categorie?.id === idCategorie);
+
+  function choisirCategorie(id) {
+    setSearchParams(id === null ? {} : { categorie: id });
+  }
+
   return (
-    <Container className="my-5">
-      <h1 className="mb-4 text-center">Liste des produits</h1>
-      <Row className="g-4">
-        {produits.map((produit) => {
-          const infosPrix = resumePrix(produit.declinaisons);
-          return (
-            <Col key={produit.id} xs={12} sm={6} md={4} lg={3}>
-              <ProduitCard
-                id={produit.id}
-                nomDuProduit={produit.nomDuProduit}
-                description={produit.description}
-                urlImage={urlImageProduit(produit)}
-                prix={infosPrix?.min}
-                prixDes={infosPrix?.plusieursPrix}
-              />
-            </Col>
-          );
-        })}
-      </Row>
-    </Container>
+    <>
+      <h1 className="visually-hidden">La boutique</h1>
+
+      <div className="catalogue-filtres">
+        <div className="catalogue-filtres-contenu">
+          <div className="catalogue-categories" role="group" aria-label="Filtrer par catégorie">
+            <button type="button" aria-pressed={idCategorie === null} onClick={() => choisirCategorie(null)}>
+              Tout
+            </button>
+            {categories.map((c) => (
+              <button key={c.id} type="button" aria-pressed={idCategorie === c.id} onClick={() => choisirCategorie(c.id)}>
+                {c.nomCategorie}
+              </button>
+            ))}
+          </div>
+          <p className="catalogue-compteur" aria-live="polite">
+            {produitsAffiches.length} {produitsAffiches.length > 1 ? 'pièces' : 'pièce'}
+          </p>
+        </div>
+      </div>
+
+      <div className="catalogue">
+        {produitsAffiches.length === 0 ? (
+          <p className="catalogue-vide">Aucune pièce dans cette catégorie.</p>
+        ) : (
+          <ul className="catalogue-grille">
+            {produitsAffiches.map((produit) => {
+              const infosPrix = resumePrix(produit.declinaisons);
+              return (
+                <li key={produit.id}>
+                  <ProduitCard
+                    id={produit.id}
+                    nomDuProduit={produit.nomDuProduit}
+                    description={produit.description}
+                    urlImage={urlImageProduit(produit)}
+                    prix={infosPrix?.min}
+                    prixDes={infosPrix?.plusieursPrix}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </>
   );
 };
 

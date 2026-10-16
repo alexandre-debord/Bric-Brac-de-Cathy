@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Catalogue.css — page Boutique (/produits)
+   Barre de filtres par catégorie + compteur, puis grille de cartes.
+   Les cartes elles-mêmes restent stylées par Produits.css (ProduitCard).
+   ========================================================================== */
+
+/* --- Barre de filtres (bandeau pleine largeur) --------------------------- */
+.catalogue-filtres {
+  border-top: 1px solid var(--bordure);
+  border-bottom: 1px solid var(--bordure);
+  margin-top: 2rem;
+}
+
+.catalogue-filtres-contenu {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+/* Liste des catégories : défile horizontalement sur mobile si trop longue */
+.catalogue-categories {
+  display: flex;
+  gap: 1.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;          /* cache la barre de défilement (Firefox) */
+}
+.catalogue-categories::-webkit-scrollbar {
+  display: none;                  /* idem (Chrome, Edge, Safari) */
+}
+
+.catalogue-categories button {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 1.1rem 0 calc(1.1rem - 2px);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.catalogue-categories button:hover {
+  color: var(--texte);
+}
+/* Filtre actif : repéré par aria-pressed (état aussi annoncé aux lecteurs d'écran) */
+.catalogue-categories button[aria-pressed='true'] {
+  color: var(--bordeaux);
+  border-bottom-color: var(--bordeaux);
+}
+
+/* "8 pièces" */
+.catalogue-compteur {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+
+/* --- Grille des produits ------------------------------------------------- */
+.catalogue {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.catalogue-grille {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.catalogue-vide {
+  text-align: center;
+  color: var(--texte-doux);
+  padding: 3rem 0;
+}
+
+@media (max-width: 575.98px) {
+  .catalogue-filtres-contenu {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .catalogue-categories {
+    width: 100%;
+  }
+  .catalogue-compteur {
+    padding-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .catalogue-grille {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
