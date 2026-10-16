@@ -14,3 +14,7 @@
 ###< lexik/jwt-authentication-bundle ###
 /Claude outputs/
 *.lo1
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
