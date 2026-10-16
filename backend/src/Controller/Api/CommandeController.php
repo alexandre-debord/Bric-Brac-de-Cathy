@@ -13,11 +13,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use App\Service\CalculateurTotal;
 
 class CommandeController
 {
     #[Route('/api/commandes', methods: ['POST'])]
-    public function creer(#[CurrentUser] User $user, Request $request, EntityManagerInterface $em): JsonResponse
+    public function creer(#[CurrentUser] User $user, Request $request, EntityManagerInterface $em, CalculateurTotal $calculateur): JsonResponse
     {
         // 1. Validation : livraison obligatoire (entier), facturation facultative (entier si présente)
         $data = json_decode($request->getContent(), true);
@@ -60,7 +61,7 @@ class CommandeController
             return new JsonResponse(['error' => 'Panier vide.'], 400);
         }
 
-        $totalCentimes = 0;
+        $lignesPourTotal = [];
         $conn = $em->getConnection();
         $conn->beginTransaction();
 
@@ -90,8 +91,10 @@ class CommandeController
                 }
 
                 // Incrémentation du total HT en centimes
-                $totalCentimes += (int) round((float) $declinaison->getPrix() * 100) * $quantite;
+                  $lignesPourTotal[] = ['prix' => $declinaison->getPrix(), 'quantite' => $quantite];
             }
+
+              $totalCentimes = $calculateur->total($lignesPourTotal);
 
             // Création de l'entité Commande
             $commande = new Commande();
@@ -100,7 +103,7 @@ class CommandeController
             $commande->setAdresseFacturation($adresseFacturation);
             $commande->setStatutCommande('en_attente_paiement');
             $commande->setTauxTva('0.00');
-            $commande->setTotalHt(number_format($totalCentimes / 100, 2, '.', ''));
+            $commande->setTotalHt($calculateur->formater($totalCentimes));
             $commande->setDateCommande(new \DateTimeImmutable());
             $em->persist($commande);
 
