@@ -5,7 +5,7 @@ import { useCart } from 'react-use-cart';
 import { useAuth } from '../context/AuthContext';
 import { usePanier } from '../hooks/usePanier';
 import { formaterPrix } from '../utils/formaterPrix';
-import FormulaireAdresse from './FormulaireAdresse';
+import FormulaireAdresse from "../components/FormulaireAdresse";
 import { useApi } from '../hooks/useApi';
 
 

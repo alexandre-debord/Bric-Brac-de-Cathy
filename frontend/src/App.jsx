@@ -2,16 +2,16 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
-import Accueil from './Accueil.jsx';
-import Panier from './components/Panier.jsx';
-import TopBar from './components/TopBar.jsx';
-import Produits from './components/Produits.jsx';
-import Footer from './components/Footer.jsx';
-import ProduitDetail from './components/ProduitDetail.jsx';
-import Connexion from './components/Connexion.jsx';
-import Commande from './components/Commande.jsx';
-import Confirmation from './components/Confirmation.jsx';
-import Inscription from './components/Inscription.jsx';
+import Accueil from './pages/Accueil.jsx';
+import Panier from './pages/Panier.jsx';
+import TopBar from "./components/TopBar.jsx";
+import Produits from './pages/Produits.jsx';
+import Footer from "./components/Footer.jsx";
+import ProduitDetail from './pages/ProduitDetail.jsx';
+import Connexion from './pages/Connexion.jsx';
+import Commande from './pages/Commande.jsx';
+import Confirmation from './pages/Confirmation.jsx';
+import Inscription from './pages/Inscription.jsx';
 
 
 function App() {

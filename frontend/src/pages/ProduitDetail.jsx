@@ -8,7 +8,7 @@ import { usePanier } from '../hooks/usePanier';
 import { versLignePanier } from '../utils/versLignePanier';
 import { formaterPrix } from '../utils/formaterPrix';
 import { apiFetch } from '../utils/apiFetch';
-import SuggestionsProduits from './SuggestionsProduits';
+import SuggestionsProduits from '../components/SuggestionsProduits';
 
 const ProduitDetail = () => {
   const { id } = useParams();

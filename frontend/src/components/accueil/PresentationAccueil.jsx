@@ -1,4 +1,4 @@
-import imagePresentation from "../../assets/PresentationAccueil.jpg"; 
+import imagePresentation from "../../assets/presentationAccueil.jpg"; 
 import '../../css/PresentationAccueil.css';
 
 export default function PresentationAccueil() {

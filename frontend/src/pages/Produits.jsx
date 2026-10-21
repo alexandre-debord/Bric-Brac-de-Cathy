@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Container, Spinner } from 'react-bootstrap';
-import ProduitCard from './ProduitCard';
+import ProduitCard from '../components/ProduitCard';
 import { apiFetch } from '../utils/apiFetch';
 import { urlImageProduit } from '../utils/urlImageProduit';
 import { resumePrix } from '../utils/resumePrix';
