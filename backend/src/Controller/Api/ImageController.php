@@ -22,23 +22,42 @@ class ImageController
     {
         $file = $request->files->get('image');
 
-
+        // on regarde si le fichier est present 
         if ($file === null) {
-            return new JsonResponse(['error' => 'Message expliquant ce qui manque'], 400);
+            return new JsonResponse(['error' => 'Veuillez envoyer une image.'], 400);
         }
+
+                // 1 bis. L'envoi s'est-il bien passé côté PHP ?
+        if (!$file->isValid()) {
+            return new JsonResponse(['error' => 'L’envoi de l’image a échoué.'], 400);
+        }
+
+        // type d'image autoriser
+        $typesAutorises = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($file->getMimeType(), $typesAutorises, true)) {
+            return new JsonResponse(['error' => 'Formats acceptés : JPEG, PNG ou WebP.'], 400);
+        }
+
+        // limitation de la taille 
+        if ($file->getSize() > 2 * 1024 * 1024) {
+            return new JsonResponse(['error' => 'L\'image ne doit pas dépasser 2 Mo.'], 400);
+        }
+
+        // on cherche si le produit existe
         $produit = $em->getRepository(Produit::class)->find($id);
-
         if ($produit === null) {
-            return new JsonResponse(['error' => 'introuvable'], 404);
+            return new JsonResponse(['error' => 'Produit introuvable.'], 404);
         }
-
-
 
         $chemin = $file->getPathname();
         Configuration::instance($_ENV['CLOUDINARY_URL']);
 
         $upload = new UploadApi();
-        $result = $upload->upload($chemin);
+                try {
+            $result = $upload->upload($chemin);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => 'Envoi de l’image impossible, réessaie plus tard.'], 502);
+        }
 
         $image = new Image();
         $image->setUrlImage($result['secure_url']);
@@ -46,16 +65,16 @@ class ImageController
 
         $em->persist($image);
         $em->flush();
-        
-        $file = [
+
+        $infos = [
             'nomOriginal' => $file->getClientOriginalName(),
             'taille' => $file->getSize(),
             'type' => $file->getMimeType(),
         ];
-        return new JsonResponse([
+                return new JsonResponse([
             'ok' => true,
-            'donnee' => $file,
+            'donnee' => $infos,
             'urlCloudinary' => $result['secure_url']
-        ]);
+        ], 201);
     }
 }
