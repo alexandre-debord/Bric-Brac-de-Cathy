@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useCart } from 'react-use-cart';
 import { lignesServeurVersItems, itemsVersLignesServeur } from '../utils/panierServeur';
 import { apiFetch, ErreurApi } from '../utils/apiFetch';
@@ -7,9 +7,42 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const { items, setItems, emptyCart } = useCart();
+    const [utilisateur, setUtilisateur] = useState(null);
+
     const [token, setToken] = useState(() => {
         try { return localStorage.getItem('token'); } catch { return null; }
     });
+    const [chargementUtilisateur, setChargementUtilisateur] = useState(Boolean(token));
+
+    useEffect(() => {
+        // 1. Pas de jeton ?
+        if (!token) {
+            setUtilisateur(null);
+            setChargementUtilisateur(false);
+            return;
+        }
+
+        // 2. Il y a un jeton : on commence le chargement
+        setChargementUtilisateur(true);
+
+        apiFetch('/api/me', { token })
+            .then((data) => {
+                // 3. ranger data dans utilisateur
+                setUtilisateur(data);
+            })
+            .catch((err) => {
+                // 4. si err.status vaut 401 → deconnexion()
+                if (err.status === 401) {
+                    deconnexion();
+
+                } else {
+                    console.error("Chargement de l’utilisateur impossible", err.message);
+                }
+            })
+            .finally(() => {
+                setChargementUtilisateur(false);
+            });
+    }, [token]);
 
     async function connexion(email, motDePasse) {
         let data;
@@ -48,9 +81,10 @@ export function AuthProvider({ children }) {
         setToken(null);
         emptyCart();
     }
+    const estAdmin = utilisateur?.roles?.includes('ROLE_ADMIN') ?? false;
 
     return (
-        <AuthContext.Provider value={{ token, estConnecte: Boolean(token), connexion, deconnexion }}>
+        <AuthContext.Provider value={{ token, estConnecte: Boolean(token), connexion, deconnexion, estAdmin, utilisateur, chargementUtilisateur }}>
             {children}
         </AuthContext.Provider>
     );

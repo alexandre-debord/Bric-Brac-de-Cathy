@@ -18,6 +18,96 @@ use App\Service\CalculateurTotal;
 
 class CommandeController
 {
+    // En haut de la classe, juste après « class CommandeController { »
+    // Pour chaque statut : la liste des statuts vers lesquels il peut passer
+    private const TRANSITIONS = [
+        'en_attente_paiement' => ['payee', 'annulee'],
+        'payee' => ['expediee', 'annulee'],
+        'expediee' => [],
+        'annulee' => [],
+    ];
+
+    #[Route('/api/commandes/{id}/statut', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    public function changerStatut(int $id, Request $request, EntityManagerInterface $em, AuthorizationCheckerInterface $authChecker): JsonResponse
+    {
+        // 1. Réservé à l'admin : sinon 403 « Accès réservé à l'administrateur. »
+        if (!$authChecker->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse(['error' => 'Accès réservé à l\'administrateur.'], 403);
+        }
+
+
+        // 2. Lire le corps JSON et récupérer le nouveau statut
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data) || !isset($data['statut']) || !is_string($data['statut'])) {
+            return new JsonResponse(['error' => 'Données invalides ou statut absent.'], 400);
+        }
+        $nouveauStatut = $data['statut'];
+
+        // 3. Le statut demandé existe-t-il ?
+        if (!array_key_exists($nouveauStatut, self::TRANSITIONS)) {
+            $statutsAcceptes = implode(', ', array_keys(self::TRANSITIONS));
+            return new JsonResponse([
+                'error' => sprintf('Statut inconnu. Les statuts acceptés sont : %s.', $statutsAcceptes)
+            ], 400);
+        }
+
+        // 4. Chercher la commande par son id
+        $commande = $em->getRepository(Commande::class)->find($id);
+        if ($commande === null) {
+            return new JsonResponse(['error' => 'Commande introuvable.'], 404);
+        }
+
+        // 5. La transition est-elle autorisée depuis le statut ACTUEL ?
+        $statutActuel = $commande->getStatutCommande();
+        $transitionsPermises = self::TRANSITIONS[$statutActuel] ?? [];
+        if (!in_array($nouveauStatut, $transitionsPermises, true)) {
+            return new JsonResponse([
+                'error' => sprintf('Impossible de passer de %s à %s.', $statutActuel, $nouveauStatut)
+            ], 409);
+        }
+
+
+        // 6. Ouvrir une transaction (comme dans creer)
+        $conn = $em->getConnection();
+        $conn->beginTransaction();
+
+        try {
+            // 6a. Si le nouveau statut est « annulee » :
+            //     pour chaque ligne de la commande, REMETTRE sa quantité dans le stock de sa déclinaison
+            if ($nouveauStatut === 'annulee') {
+                foreach ($commande->getLignesCommande() as $ligne) {
+                    $declinaison = $ligne->getDeclinaison();
+                    $quantite = $ligne->getQuantite();
+                    $idDeclinaison = $declinaison->getId();
+
+                    $conn->executeStatement(
+                        'UPDATE DECLINAISON SET stock = stock + :q 
+                         WHERE id_declinaison = :id',
+                        [
+                            'q'  => $quantite,
+                            'id' => $idDeclinaison,
+                        ]
+                    );
+                }
+            }
+
+            // 6b. Changer le statut de la commande, flush, commit
+            $commande->setStatutCommande($nouveauStatut);
+            $em->flush();
+            $conn->commit();
+
+            return new JsonResponse([
+                'id_commande' => $commande->getId(),
+                'statut'      => $commande->getStatutCommande(),
+            ], 200);
+        } catch (\Throwable $e) {
+            if ($conn->isTransactionActive()) {
+                $conn->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     #[Route('/api/commandes/{id}', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function detail(int $id, #[CurrentUser] User $user, EntityManagerInterface $em, AuthorizationCheckerInterface $authChecker, CalculateurTotal $calculateur): JsonResponse
     {
