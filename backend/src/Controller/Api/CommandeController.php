@@ -13,10 +13,100 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Service\CalculateurTotal;
 
 class CommandeController
 {
+    #[Route('/api/commandes/{id}', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function detail(int $id, #[CurrentUser] User $user, EntityManagerInterface $em, AuthorizationCheckerInterface $authChecker, CalculateurTotal $calculateur): JsonResponse
+    {
+
+        $criteres = ['id' => $id];
+
+
+        if (!$authChecker->isGranted('ROLE_ADMIN')) {
+            $criteres['utilisateur'] = $user;
+        }
+
+        $commande = $em->getRepository(Commande::class)->findOneBy($criteres);
+
+        if ($commande === null) {
+            return new JsonResponse(['error' => 'Commande introuvable.'], 404);
+        }
+
+        $lignes = [];
+        foreach ($commande->getLignesCommande() as $ligne) {
+            $declinaison = $ligne->getDeclinaison();
+            $quantite = $ligne->getQuantite();
+            $prix = $ligne->getPrixUnit();
+            $sousTotalCentimes = $calculateur->enCentimes($prix) * $quantite;
+            $lignes[] = [
+                'produit'  => $declinaison->getProduit()->getNomDuProduit(),
+                'couleur'  => $declinaison->getCouleur()->getChoixCouleur(),
+                'quantite'  => $quantite,
+                'prix_unit'  => $prix,
+                'sous_total'  => $calculateur->formater($sousTotalCentimes),
+            ];
+        }
+
+        $adresse = $commande->getAdresseLivraison();
+
+        return new JsonResponse([
+            'id'             => $commande->getId(),
+            'date'           => $commande->getDateCommande()->format(\DateTimeInterface::ATOM),
+            'statut'         => $commande->getStatutCommande(),
+            'total_ht'       => $commande->getTotalHt(),
+            'lignes'         => $lignes,
+            'adresse_livraison' => [
+                'rue'         => $adresse->getRue(),
+                'code_postal' => $adresse->getCodePostal(),
+                'ville'       => $adresse->getVille(),
+                'pays'        => $adresse->getPays(),
+            ]
+        ], 200);
+    }
+    #[Route('/api/commandes', methods: ['GET'])]
+    public function lister(#[CurrentUser] ?User $user, EntityManagerInterface $em, AuthorizationCheckerInterface $authChecker): JsonResponse
+    {
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Accès refusé. Vous devez être connecté.'], 401);
+        }
+
+        $qb = $em->getRepository(Commande::class)->createQueryBuilder('c');
+
+
+        if (!$authChecker->isGranted('ROLE_ADMIN')) {
+            $qb->andWhere('c.utilisateur = :user')
+                ->setParameter('user', $user);
+        }
+
+
+        $qb->orderBy('c.dateCommande', 'DESC');
+
+        $commandes = $qb->getQuery()->getResult();
+        $data = [];
+
+
+        foreach ($commandes as $commande) {
+            $nombreArticles = 0;
+            foreach ($commande->getLignesCommande() as $ligne) {
+                $nombreArticles += $ligne->getQuantite();
+            }
+
+            $data[] = [
+                'id'              => $commande->getId(),
+                'date'            => $commande->getDateCommande()->format(\DateTimeInterface::ATOM),
+                'statut'          => $commande->getStatutCommande(),
+                'total_ht'           => $commande->getTotalHt(),
+                'nombre_articles' => $nombreArticles,
+            ];
+        }
+
+        return new JsonResponse($data, 200);
+    }
+
     #[Route('/api/commandes', methods: ['POST'])]
     public function creer(#[CurrentUser] User $user, Request $request, EntityManagerInterface $em, CalculateurTotal $calculateur): JsonResponse
     {
@@ -91,10 +181,10 @@ class CommandeController
                 }
 
                 // Incrémentation du total HT en centimes
-                  $lignesPourTotal[] = ['prix' => $declinaison->getPrix(), 'quantite' => $quantite];
+                $lignesPourTotal[] = ['prix' => $declinaison->getPrix(), 'quantite' => $quantite];
             }
 
-              $totalCentimes = $calculateur->total($lignesPourTotal);
+            $totalCentimes = $calculateur->total($lignesPourTotal);
 
             // Création de l'entité Commande
             $commande = new Commande();

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: "COMMANDE")]
@@ -41,7 +43,21 @@ class Commande
     #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id_utilisateur", nullable: false)]
     private User $utilisateur;
 
+    #[ORM\OneToMany(mappedBy: "commande", targetEntity: LigneDeCommande::class)]
+    private Collection $lignesCommande;
+
+
     // getters/setters
+
+    public function __construct()
+    {
+        $this->lignesCommande = new ArrayCollection();
+    }
+
+    public function getLignesCommande(): Collection
+    {
+        return $this->lignesCommande;
+    }
 
     public function getId(): ?int
     {

@@ -24,7 +24,7 @@ class LigneDeCommande
     #[ORM\JoinColumn(name: "id_declinaison", referencedColumnName: "id_declinaison", nullable: false)]
     private Declinaison $declinaison;
 
-    #[ORM\ManyToOne(targetEntity: Commande::class)]
+    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: "lignesCommande")]
     #[ORM\JoinColumn(name: "id_commande", referencedColumnName: "id_commande", nullable: false, onDelete: "CASCADE")]
     private Commande $commande;
 
