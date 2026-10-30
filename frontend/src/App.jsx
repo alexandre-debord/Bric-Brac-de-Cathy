@@ -12,6 +12,8 @@ import Connexion from './pages/Connexion.jsx';
 import Commande from './pages/Commande.jsx';
 import Confirmation from './pages/Confirmation.jsx';
 import Inscription from './pages/Inscription.jsx';
+import Admin from './pages/Admin.jsx';
+import RouteAdmin from './components/RouteAdmin.jsx';
 
 
 function App() {
@@ -28,6 +30,7 @@ function App() {
                     <Route path="/commande" element={<Commande />} />
                     <Route path="/commande/confirmation" element={<Confirmation />} />
                     <Route path="/inscription" element={<Inscription />} />
+                    <Route path="/admin" element={<RouteAdmin><Admin /></RouteAdmin>} />
 
                     {/* Route attrape-tout pour éviter la page blanche sur des liens non définis (ex: /connect, /contact) */}
                     <Route path="*" element={<p className="text-center py-5">Page introuvable</p>} />
