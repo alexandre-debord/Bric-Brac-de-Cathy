@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Container, Row, Col, Nav, Offcanvas} from 'react-bootstrap';
+import { Container, Row, Col, Nav, Offcanvas } from 'react-bootstrap';
 import { List, Bag } from 'react-bootstrap-icons';
 import { NavLink } from 'react-router-dom';
 import { usePanier } from '../hooks/usePanier';
 import { useAuth } from '../context/AuthContext';
+
 
 import '../css/TopBar.css';
 
@@ -14,7 +15,7 @@ const TopBar = () => {
     const [showMenu, setShowMenu] = useState(false);
     const { totalItems } = usePanier();
 
-    const { estConnecte, deconnexion } = useAuth();
+    const { estConnecte, deconnexion, estAdmin } = useAuth();
 
     const handleClose = () => setShowMenu(false);
     const handleShow = () => setShowMenu(true);
@@ -25,9 +26,9 @@ const TopBar = () => {
                 <Container fluid className="px-3 px-lg-4">
                     <Row className="align-items-center">
 
-                        {/* menu responsive */}
 
-                        <Col xs={3} lg={4} className="d-flex align-items-center">
+                        {/* Gauche : menu mobile + navigation sur grand écran */}
+                        <Col xs={3} lg={4} className="d-flex align-items-center gap-4">
                             <button
                                 className="topbar-menu-btn d-lg-none"
                                 type="button"
@@ -37,8 +38,17 @@ const TopBar = () => {
                                 <List size={22} />
                                 <span className="d-none d-sm-inline ms-1">MENU</span>
                             </button>
-                        </Col>
 
+                            <Nav.Link className="topbar-link d-none d-lg-inline" as={NavLink} to="/produits">
+                                La Boutique
+                            </Nav.Link>
+
+                            {estAdmin && (
+                                <Nav.Link className="topbar-link d-none d-lg-inline" as={NavLink} to="/admin">
+                                    Admin
+                                </Nav.Link>
+                            )}
+                        </Col>
                         {/* Centre : Titre de la marque */}
 
                         <Col xs={6} lg={4} className="text-center">
@@ -50,9 +60,7 @@ const TopBar = () => {
                         {/* Droite : Liens */}
                         <Col xs={3} lg={4}>
                             <div className="topbar-right">
-                                <Nav.Link className="topbar-link d-none d-lg-inline" as={NavLink} to="/produits">
-                                    La Boutique
-                                </Nav.Link>
+
                                 {estConnecte ? (
                                     <Nav.Link as="button" type="button" className="topbar-link d-none d-lg-inline" onClick={deconnexion}>
                                         Déconnexion
@@ -82,7 +90,7 @@ const TopBar = () => {
             </header>
 
             {/* Panneau latéral Burger */}
-            
+
             <Offcanvas
                 show={showMenu}
                 onHide={handleClose}
@@ -124,6 +132,14 @@ const TopBar = () => {
                                 Contact
                             </Nav.Link>
                         </li>
+                        {estAdmin && (
+                            <li className="offcanvas-menu-item">
+                                <Nav.Link as={NavLink} to="/admin" className="offcanvas-menu-link"
+                                    onClick={handleClose}>
+                                    Admin
+                                </Nav.Link>
+                            </li>
+                        )}
                     </ul>
 
                     <div className="offcanvas-footer-info">
